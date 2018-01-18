@@ -4,22 +4,13 @@
 <%@ Import Namespace = "System.IO"%>
 <%@ Import Namespace = "System.Linq"%>
 <%@ Import Namespace = "System.Collections.Generic"%>
-<%@ Import Namespace = "DocumentFormat.OpenXml"%>
-<%@ Import Namespace = "DocumentFormat.OpenXml.Packaging"%>
-<%@ Import Namespace = "DocumentFormat.OpenXml.Wordprocessing"%>
-<%@ Import Namespace = "A=DocumentFormat.OpenXml.Drawing" %>
-<%@ Import Namespace = "DW=DocumentFormat.OpenXml.Drawing.Wordprocessing"%>
-<%@ Import Namespace = "PIC=DocumentFormat.OpenXml.Drawing.Pictures"%>
 
 <script runat="server">
 	protected string in_scode = "";
 	protected string in_no = "";
 	protected string branch = "";
-	protected string receipt_title = "";
 
-	public IpoReport ipoRpt = null;
-	protected string templateFile = "";
-	protected string outputFile = "";
+	protected IpoReport ipoRpt = null;
 
 	private void Page_Load(System.Object sender, System.EventArgs e) {
 		Response.CacheControl = "Private";
@@ -30,24 +21,25 @@
 		in_scode = (Request["in_scode"] ?? "").ToString();//n100
 		in_no = (Request["in_no"] ?? "").ToString();//20170103001
 		branch = (Request["branch"] ?? "").ToString();//N
-		receipt_title = (Request["receipt_title"] ?? "").ToString();//B
 
 		try {
+			ipoRpt = new IpoReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch);
 			WordOut();
 		}
 		catch (Exception ex) {
-			//Response.Write(ex.ToString());
-			throw ex;
+			Response.Write(ex.ToString().Replace("\n", "<BR>"));
 		}
 		finally {
-			ipoRpt.CloseRpt();
+			if (ipoRpt != null) ipoRpt.Close();
 		}
 	}
 
 	protected void WordOut() {
-		ipoRpt = new IpoReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch, receipt_title);
-		templateFile = Server.MapPath("~/ReportTemplate") + @"\01_發明專利申請書.docx";
-		ipoRpt.CloneToStream(templateFile, true);
+		Dictionary<string, string> _TemplateFileList = new Dictionary<string, string>();
+		_TemplateFileList.Add("apply", Server.MapPath("~/ReportTemplate") + @"\01發明專利申請書.docx");
+		_TemplateFileList.Add("base", Server.MapPath("~/ReportTemplate") + @"\00基本資料表.docx");
+		ipoRpt.CloneFromFile(_TemplateFileList, true);
+		
 		DataTable dmp = ipoRpt.Dmp;
 		if (dmp.Rows.Count > 0) {
 			//標題區塊
@@ -58,6 +50,7 @@
 			} else {
 				ipoRpt.ReplaceBookmark("reality", "否");
 			}
+
 			//事務所或申請人案件編號
 			ipoRpt.ReplaceBookmark("seq", ipoRpt.Seq + "-" + dmp.Rows[0]["scode1"].ToString());
 			//中文發明名稱 / 英文發明名稱
@@ -101,7 +94,36 @@
 			}
 			ipoRpt.ReplaceBookmark("exh_date", exh_date);
 
+			//主張優先權
+			using (DataTable dtPrior = ipoRpt.Prior) {
+				for (int i = 0; i < dtPrior.Rows.Count; i++) {
+					ipoRpt.CopyBlock("b_prior1");
+					ipoRpt.ReplaceBookmark("prior_num", (i + 1).ToString());
+					ipoRpt.ReplaceBookmark("prior_country", dtPrior.Rows[i]["Country_name"].ToString());
+					string prior_date = "";
+					if (dtPrior.Rows[0]["prior_date"] != System.DBNull.Value && dtPrior.Rows[0]["prior_date"] != null) {
+						prior_date = Convert.ToDateTime(dtPrior.Rows[0]["prior_date"]).ToString("yyyy/MM/dd");
+					}
+					ipoRpt.ReplaceBookmark("prior_date", prior_date);
+					ipoRpt.ReplaceBookmark("prior_no", dtPrior.Rows[i]["prior_no"].ToString());
 
+					switch (dtPrior.Rows[i]["prior_country"].ToString().Trim()) {
+						case "JA":
+							ipoRpt.CopyBlock("b_prior2");
+							ipoRpt.ReplaceBookmark("case1nm", dtPrior.Rows[i]["case1nm"].ToString());
+							ipoRpt.CopyBlock("b_prior3");
+							ipoRpt.ReplaceBookmark("mprior_access", dtPrior.Rows[i]["mprior_access"].ToString());
+							break;
+						case "KO":
+							ipoRpt.CopyBlock("b_prior3");
+							ipoRpt.ReplaceBookmark("mprior_access", "交換");
+							break;
+					}
+					
+					ipoRpt.AddParagraph("");
+				}
+			}
+			
 			//主張利用生物材料/生物材料不須寄存/聲明本人就相同創作在申請本發明專利之同日-另申請新型專利/收據抬頭
 			ipoRpt.CopyBlock("b_content");
 			//聲明本人就相同創作在申請本發明專利之同日-另申請新型專利
@@ -117,14 +139,16 @@
 			//具結
 			ipoRpt.CopyBlock("b_sign");
 
+
 			bool baseflag = true;//是否產生基本資料表
 			if (baseflag) {
-				ipoRpt.AppendNewPageFoot(0);
-				ipoRpt.AppendBaseData();
+				ipoRpt.CopyPageFoot("apply",true);
+				ipoRpt.AppendBaseData("base");
 			} else {
-				ipoRpt.AppendFoot(0);
+				ipoRpt.CopyPageFoot("apply", false);
 			}
 		}
-		ipoRpt.Flush("-發明-" + DateTime.Now.ToString("yyyyMMdd") + ".docx");
+
+		ipoRpt.Flush(ipoRpt.Seq + "-發明.docx");
 	}
 </script>

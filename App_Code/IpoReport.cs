@@ -13,12 +13,12 @@ public class IpoReport : OpenXmlHelper {
 	protected string _in_no = "";
 	protected string _in_scode = "";
 	protected string _branch = "";
-	protected string _receipt_title = "";
 	protected DBHelper _conn = null;
 	protected DataTable _dtDmp = null;
 	protected DataTable _dtApcust = null;
 	protected DataTable _dtAgt = null;
 	protected DataTable _dtAnt = null;
+	protected DataTable _dtPrior = null;
 
 	/// <summary>
 	/// 組合後的本所編號
@@ -38,32 +38,38 @@ public class IpoReport : OpenXmlHelper {
 	}
 
 	/// <summary>
-	/// 申請人
+	/// 申請人資料
 	/// </summary>
 	public DataTable Apcust {
 		get { return _dtApcust; }
 	}
 
 	/// <summary>
-	/// 代理人
+	/// 代理人資料
 	/// </summary>
 	public DataTable Agent {
 		get { return _dtAgt; }
 	}
 
 	/// <summary>
-	/// 發明人/新型創作/設計人
+	/// 發明人/新型創作/設計人資料
 	/// </summary>
 	public DataTable Ant {
 		get { return _dtAnt; }
 	}
 
-	public IpoReport(string connStr, string in_scode, string in_no, string branch, string receipt_title) {
+	/// <summary>
+	/// 優先權資料
+	/// </summary>
+	public DataTable Prior {
+		get { return _dtPrior; }
+	}
+
+	public IpoReport(string connStr, string in_scode, string in_no, string branch) {
 		this._connStr = connStr;
 		this._in_no = in_no;
 		this._in_scode = in_scode;
 		this._branch = branch;
-		this._receipt_title = receipt_title;
 		this._conn = new DBHelper(connStr, false).Debug(false);
 
 		this._dtDmp = new DataTable();
@@ -73,15 +79,18 @@ public class IpoReport : OpenXmlHelper {
 		this._dtApcust = GetApcust();//抓申請人
 		this._dtAgt = GetAgent();//抓代理人
 		this._dtAnt = GetAnt();//抓發明人/新型創作/設計人
+		this._dtPrior = GetPrior();//抓優先權
 	}
 
+	#region 關閉
 	/// <summary>
 	/// 關閉
 	/// </summary>
-	public void CloseRpt() {
+	public void Close() {
 		_conn.Dispose();
-		this.Close();
+		this.Dispose();
 	}
+	#endregion
 
 	#region 取得組合後的本所編號
 	/// <summary>
@@ -188,9 +197,9 @@ public class IpoReport : OpenXmlHelper {
 	}
 	#endregion
 
-	#region 取得發明人/新型創作/設計人
+	#region 取得發明人/新型創作/設計人資料
 	/// <summary>
-	/// 取得發明人/新型創作/設計人
+	/// 取得發明人/新型創作/設計人資料
 	/// </summary>
 	private DataTable GetAnt() {
 		string SQL = " Select ant_id,ant_country,ant_cname1,ant_cname2,ant_ename1,ant_ename2,ant_fcname,ant_lcname,ant_fename,ant_lename " +
@@ -216,6 +225,29 @@ public class IpoReport : OpenXmlHelper {
 				dt.Rows[i]["Ename_string"] = dt.Rows[i]["ant_ename1"].ToString().Trim() + dt.Rows[i]["ant_ename2"].ToString().Trim();
 			}
 		}
+		return dt;
+	}
+	#endregion
+	
+	#region 取得優先權資料
+	/// <summary>
+	/// 取得優先權資料
+	/// </summary>
+	private DataTable GetPrior() {
+		string SQL = "SELECT a.prior_yn, a.prior_no, a.prior_country, a.prior_date, a.mprior_access, a.prior_case1 " +
+			", c.coun_code, c.coun_cname, c.coun_ename " +
+			", (SELECT mark1 FROM cust_code WHERE code_type = 'case1' AND cust_code = a.prior_case1) AS case1nm_T " +
+			", (SELECT code_name FROM cust_code WHERE code_type = 'pecase1' AND cust_code = a.prior_case1) AS case1nm " +
+			", isnull(c.coun_code,'')+isnull(c.coun_cname,'') Country_name " +
+			" FROM dmp_prior AS a " +
+			" INNER JOIN vdmpall AS b ON a.seq = b.seq AND a.seq1 = b.seq1 " +
+			" LEFT JOIN sysctrl.dbo.IPO_country AS c ON a.prior_country = c.ref_coun_code " +
+			" WHERE b.in_scode = '" + _in_scode + "' " +
+			" AND b.in_no = '" + _in_no + "' " +
+			" AND a.prior_yn = 'Y'";
+
+		DataTable dt = new DataTable();
+		_conn.DataTable(SQL, dt);
 		return dt;
 	}
 	#endregion
@@ -275,20 +307,20 @@ public class IpoReport : OpenXmlHelper {
 	/// <summary>
 	/// 產生基本資料表
 	/// </summary>
-	public void AppendBaseData() {
-		CopyBlock("base_title");
+	public void AppendBaseData(string baseDocName) {
+		CopyBlock(baseDocName, "base_title");
 		//申請人
 		using (DataTable dtAp = GetApcust()) {
 			for (int i = 0; i < dtAp.Rows.Count; i++) {
-				CopyBlock("base_apcust1");
+				CopyBlock(baseDocName, "base_apcust1");
 				ReplaceBookmark("base_ap_num", (i + 1).ToString());
 				ReplaceBookmark("base_ap_country", dtAp.Rows[i]["Country_name"].ToString());
 				ReplaceBookmark("ap_class", dtAp.Rows[i]["apclass_name"].ToString());
 				if (dtAp.Rows[i]["ap_country"].ToString() == "T") {
-					CopyBlock("base_apcust2");
+					CopyBlock(baseDocName, "base_apcust2");
 					ReplaceBookmark("apcust_no", dtAp.Rows[i]["apcust_no"].ToString());
 				}
-				CopyBlock("base_apcust3");
+				CopyBlock(baseDocName, "base_apcust3");
 				ReplaceBookmark("base_ap_cname_title", dtAp.Rows[i]["Title_cname"].ToString());
 				ReplaceBookmark("base_ap_ename_title", dtAp.Rows[i]["Title_ename"].ToString());
 				ReplaceBookmark("base_ap_cname", dtAp.Rows[i]["Cname_string"].ToString().ToXmlUnicode());
@@ -308,16 +340,18 @@ public class IpoReport : OpenXmlHelper {
 			}
 		}
 		//代理人
-		CopyBlock("base_agent");
+		CopyBlock(baseDocName, "base_agent");
 		using (DataTable dtAgt = GetAgent()) {
 			for (int i = 0; i < dtAgt.Rows.Count; i++) {
-				CopyBlock("base_apcust");
+				CopyBlock(baseDocName, "base_apcust");
+				ReplaceBookmark("agt_idno1", dtAgt.Rows[i]["agt_idno1"].ToString());
 				ReplaceBookmark("agt_id1", dtAgt.Rows[i]["agt_id1"].ToString());
 				ReplaceBookmark("base_agt_name1", dtAgt.Rows[i]["agt_name1"].ToString());
 				ReplaceBookmark("agt_zip1", dtAgt.Rows[i]["agt_zip"].ToString());
 				ReplaceBookmark("agt_addr1", dtAgt.Rows[i]["agt_addr"].ToString());
 				ReplaceBookmark("agatt_tel1", dtAgt.Rows[i]["agt_tel"].ToString());
 				ReplaceBookmark("agatt_fax1", dtAgt.Rows[i]["agt_fax"].ToString());
+				ReplaceBookmark("agt_idno2", dtAgt.Rows[i]["agt_idno2"].ToString());
 				ReplaceBookmark("agt_id2", dtAgt.Rows[i]["agt_id2"].ToString());
 				ReplaceBookmark("base_agt_name2", dtAgt.Rows[i]["agt_name2"].ToString());
 				ReplaceBookmark("agt_zip2", dtAgt.Rows[i]["agt_zip"].ToString());
@@ -329,16 +363,21 @@ public class IpoReport : OpenXmlHelper {
 		//發明人/新型創作/設計人
 		using (DataTable dtAnt = GetAnt()) {
 			for (int i = 0; i < dtAnt.Rows.Count; i++) {
-				CopyBlock("base_ant");
+				CopyBlock(baseDocName, "base_ant1");
 				ReplaceBookmark("base_ant_num", "發明人" + (i + 1).ToString());
 				ReplaceBookmark("base_ant_country", dtAnt.Rows[i]["Country_name"].ToString());
-				ReplaceBookmark("ant_id", dtAnt.Rows[i]["ant_id"].ToString());
+				if (dtAnt.Rows[i]["ant_country"].ToString() == "T") {
+					CopyBlock(baseDocName, "base_ant2");
+					ReplaceBookmark("ant_id", dtAnt.Rows[i]["ant_id"].ToString());
+				}
+				CopyBlock(baseDocName, "base_ant3");
 				ReplaceBookmark("base_ant_cname", dtAnt.Rows[i]["Cname_string"].ToString().ToXmlUnicode());
 				ReplaceBookmark("base_ant_ename", dtAnt.Rows[i]["Ename_string"].ToString().ToXmlUnicode());
+				AddParagraph("");
 			}
 		}
 
-		AppendFoot(1);//頁尾
+		CopyPageFoot(baseDocName, false);//頁尾
 	}
 	#endregion
 }
