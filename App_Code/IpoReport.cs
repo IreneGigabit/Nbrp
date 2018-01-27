@@ -65,6 +65,10 @@ public class IpoReport : OpenXmlHelper {
 		get { return _dtPrior; }
 	}
 
+	public IpoReport() {
+
+	}
+
 	public IpoReport(string connStr, string in_scode, string in_no, string branch) {
 		this._connStr = connStr;
 		this._in_no = in_no;
@@ -87,7 +91,7 @@ public class IpoReport : OpenXmlHelper {
 	/// 關閉
 	/// </summary>
 	public void Close() {
-		_conn.Dispose();
+		if (_conn != null) _conn.Dispose();
 		this.Dispose();
 	}
 	#endregion
@@ -373,7 +377,7 @@ public class IpoReport : OpenXmlHelper {
 				CopyBlock(baseDocName, "base_ant3");
 				ReplaceBookmark("base_ant_cname", dtAnt.Rows[i]["Cname_string"].ToString().ToXmlUnicode());
 				ReplaceBookmark("base_ant_ename", dtAnt.Rows[i]["Ename_string"].ToString().ToXmlUnicode());
-				AddParagraph("");
+				AddParagraph();
 			}
 		}
 

@@ -120,7 +120,7 @@
 							break;
 					}
 					
-					ipoRpt.AddParagraph("");
+					ipoRpt.AddParagraph();
 				}
 			}
 			
@@ -135,7 +135,7 @@
 			ipoRpt.ReplaceBookmark("receipt_name", ipoRpt.RectitleName);
 
 			//附送書件
-			ipoRpt.CloneReplaceBlock("b_attach", "#seq#", ipoRpt.Seq);
+			ipoRpt.CopyReplaceBlock("b_attach", "#seq#", ipoRpt.Seq);
 			//具結
 			ipoRpt.CopyBlock("b_sign");
 
