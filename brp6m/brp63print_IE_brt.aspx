@@ -29,9 +29,6 @@
 			//WordOut();
 			WordNew();
 		}
-		catch (Exception ex) {
-			Response.Write(ex.ToString().Replace("\n","<BR>"));
-		}
 		finally {
 			if (ipoRpt != null) ipoRpt.Close();
 		}
@@ -46,10 +43,12 @@
 		ipoRpt.AddText("第2頁");
 		ipoRpt.NewLine();
 		ipoRpt.AddText("下一行").NewLine().AddText("下一行");
+		//ipoRpt.SetPageSize(21, 29.7).SetPageLandscape();//A4直向
+		ipoRpt.SetPageSize(21, 29.7).SetPageLandscape();//A4橫向
 		
 		ipoRpt.Flush("[團體標章註冊申請書]-NT66824.docx");
 	}
-	
+
 	protected void WordOut() {
 		Dictionary<string, string> _TemplateFileList = new Dictionary<string, string>();
 		_TemplateFileList.Add("apply", Server.MapPath("~/ReportTemplate") + @"\FE9團體標章註冊申請書.docx");
