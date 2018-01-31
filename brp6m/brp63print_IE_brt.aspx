@@ -29,6 +29,9 @@
 			//WordOut();
 			WordNew();
 		}
+		catch (Exception ex) {
+			Response.Write(ex.ToString().Replace("\n", "<BR>"));
+		}
 		finally {
 			if (ipoRpt != null) ipoRpt.Close();
 		}
