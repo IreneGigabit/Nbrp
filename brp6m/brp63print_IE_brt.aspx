@@ -4,6 +4,12 @@
 <%@ Import Namespace = "System.IO"%>
 <%@ Import Namespace = "System.Linq"%>
 <%@ Import Namespace = "System.Collections.Generic"%>
+<%@ Import Namespace = "DocumentFormat.OpenXml"%>
+<%@ Import Namespace = "DocumentFormat.OpenXml.Packaging"%>
+<%@ Import Namespace = "DocumentFormat.OpenXml.Wordprocessing"%>
+<%@ Import Namespace = "A=DocumentFormat.OpenXml.Drawing" %>
+<%@ Import Namespace = "DW=DocumentFormat.OpenXml.Drawing.Wordprocessing"%>
+<%@ Import Namespace = "PIC=DocumentFormat.OpenXml.Drawing.Pictures"%>
 
 <script runat="server">
 	protected string in_scode = "";
@@ -23,33 +29,18 @@
 		branch = (Request["branch"] ?? "N").ToString();//N
 
 		try {
+			//Response.Write(("&#153706;瑄&#153706;").ToXmlUnicode());
+			//Response.Write(Convert.ToChar((int)153706));
+			Response.Write(char.MaxValue);
+			Response.End();
 			string dbSession = (Session["btbrtdb"] ?? "Server=web08;Database=sindbs;User ID=web_usr;Password=web1823").ToString();
 			//ipoRpt = new IpoReport(dbSession, in_scode, in_no, branch);
 			ipoRpt = new IpoReport();
-			//WordOut();
-			WordNew();
-		}
-		catch (Exception ex) {
-			Response.Write(ex.ToString().Replace("\n", "<BR>"));
+			WordOut();
 		}
 		finally {
 			if (ipoRpt != null) ipoRpt.Close();
 		}
-	}
-
-	protected void WordNew() {
-		ipoRpt.Create();
-		ipoRpt.AddParagraph().AddText("0000000\n232343243242\n3223");
-		ipoRpt.AddParagraph().AddText("xxxxx");
-		ipoRpt.AddParagraph().AddText("x1111111\nxxxx\n22233");
-		ipoRpt.NewPage();
-		ipoRpt.AddText("第2頁");
-		ipoRpt.NewLine();
-		ipoRpt.AddText("下一行").NewLine().AddText("下一行");
-		//ipoRpt.SetPageSize(21, 29.7).SetPageLandscape();//A4直向
-		ipoRpt.SetPageSize(21, 29.7).SetPageLandscape();//A4橫向
-		
-		ipoRpt.Flush("[團體標章註冊申請書]-NT66824.docx");
 	}
 
 	protected void WordOut() {

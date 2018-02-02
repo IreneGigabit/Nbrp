@@ -24,13 +24,18 @@ public static class server_code {
 	}
 
 	public static string ToXmlUnicode(this string str) {
+		return str.ToXmlUnicode(false);
+	}
+	public static string ToXmlUnicode(this string str, bool isEng) {
 		str = HttpUtility.HtmlDecode(str);
 		foreach (System.Text.RegularExpressions.Match m
 			in System.Text.RegularExpressions.Regex.Matches(str, "&#(?<ncr>\\d+?);"))
 			str = str.Replace(m.Value, Convert.ToChar(int.Parse(m.Groups["ncr"].Value)).ToString());
 		//str = str.Replace("&", "&amp;");
 		//str = str.Replace("<", "&lt;");
-		str = str.Replace("＆", "&");//防止英文欄位只能半型
+		if (isEng) {
+			str = str.Replace("＆", "&");//防止英文欄位只能半型
+		}
 		//ret=str.Replace(">","&gt;");
 		//ret=str.Replace("'","&apos;");
 		//ret=str.Replace("""","&quot;");
