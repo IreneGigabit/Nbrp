@@ -240,25 +240,26 @@ public class OpenXmlHelper {
 	/// </summary>
 	/// <param name="srcDocName">來源範本別名</param>
 	public void CopyReplaceBlock(string srcDocName, string blockName, Dictionary<string, string> mappingDic) {
+		int i = 0;
 		try {
 			List<Paragraph> pars = CopyBlockList(srcDocName, blockName);
-			for (int i = 0; i < pars.Count; i++) {
+			for (i=0; i < pars.Count; i++) {
 				string tmpInnerText = pars[i].InnerText;
-				throw new Exception(pars[i].InnerXml);
-				//pars[i].RemoveAllChildren<Run>();
-				//ParagraphProperties parProp = pars[i].Descendants<ParagraphProperties>().FirstOrDefault();
-				Run parRun = pars[i].Descendants<Run>().FirstOrDefault();
 				foreach (var item in mappingDic) {
 					tmpInnerText = tmpInnerText.Replace(item.Key, item.Value);
 				}
-				parRun.Append(new Text(tmpInnerText));
-				//parRun.AppendChild(new Text(tmpInnerText));
-				//pars[i] = (new Paragraph(new Run(new Text(tmpInnerText))));
+				Run parRun = pars[i].Descendants<Run>().FirstOrDefault();
+				pars[i].RemoveAllChildren<Run>();
+				if (parRun != null) {
+					parRun.RemoveAllChildren<Text>();
+					parRun.Append(new Text(tmpInnerText));
+					pars[i].Append(parRun.CloneNode(true));
+				}
 			}
 			outBody.Append(pars.ToArray());
 		}
 		catch (Exception ex) {
-			throw new Exception("複製範本Block錯誤!!(" + blockName + ")", ex);
+			throw new Exception("複製範本Block錯誤!!(" + blockName + "," + i + ")", ex);
 		}
 	}
 	#endregion
