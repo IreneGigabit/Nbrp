@@ -8,7 +8,7 @@ using System.Web;
 /// <summary>
 /// 產生智慧局電子申請書用
 /// </summary>
-public class IpoReport : OpenXmlHelper {
+public class IPOReport : OpenXmlHelper {
 	private string _connStr = null;
 	private string _in_no = "";
 	private string _in_scode = "";
@@ -79,11 +79,11 @@ public class IpoReport : OpenXmlHelper {
 		protected set { _dtPrior = value; }
 	}
 
-	public IpoReport() {
+	public IPOReport() {
 
 	}
 
-	public IpoReport(string connStr, string in_scode, string in_no, string branch) {
+	public IPOReport(string connStr, string in_scode, string in_no, string branch) {
 		this._connStr = connStr;
 		this._in_no = in_no;
 		this._in_scode = in_scode;
