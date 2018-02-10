@@ -134,18 +134,18 @@ public class OpenXmlHelper {
 	/// <summary>
 	/// 複製範本Block,回傳List
 	/// </summary>
-	public List<Paragraph> CopyBlockList(string blockName) {
+	public List<OpenXmlElement> CopyBlockList(string blockName) {
 		return CopyBlockList(defTplDocName, blockName);
 	}
-	
+
 	/// <summary>
 	/// 複製範本Block,回傳List
 	/// </summary>
 	/// <param name="srcDocName">來源範本別名</param>
-	private List<Paragraph> CopyBlockList(string srcDocName, string blockName) {
+	public List<OpenXmlElement> CopyBlockList(string srcDocName, string blockName) {
 		try {
 			WordprocessingDocument srcDoc = tplDoc[srcDocName]; 
-			List<Paragraph> arrElement = new List<Paragraph>();
+			List<OpenXmlElement> arrElement = new List<OpenXmlElement>();
 			Tag elementTag = srcDoc.MainDocumentPart.RootElement.Descendants<Tag>()
 			.Where(
 				element => element.Val.Value.ToLower() == blockName.ToLower()
@@ -153,9 +153,12 @@ public class OpenXmlHelper {
 	
 			if (elementTag != null) {
 				SdtElement block = (SdtElement)elementTag.Parent.Parent;
-				IEnumerable<Paragraph> tagPars = block.Descendants<Paragraph>();
-				foreach (Paragraph tagPar in tagPars) {
-					arrElement.Add((Paragraph)tagPar.CloneNode(true));
+				SdtContentBlock blockCont = block.Descendants<SdtContentBlock>().FirstOrDefault();
+				if (blockCont != null) {
+					IEnumerable<OpenXmlElement> childs = blockCont.ChildElements;
+					foreach (var item in childs) {
+						arrElement.Add(item.CloneNode(true));
+					}
 				}
 			}
 			return arrElement;
@@ -191,7 +194,7 @@ public class OpenXmlHelper {
 	/// <summary>
 	/// 複製範本Block,回傳Dictionary
 	/// </summary>
-	public Dictionary<int, Paragraph> CopyBlockDict(string blockName) {
+	public Dictionary<int, OpenXmlElement> CopyBlockDict(string blockName) {
 		return CopyBlockDict(defTplDocName, blockName);
 	}
 
@@ -199,10 +202,10 @@ public class OpenXmlHelper {
 	/// 複製範本Block,回傳Dictionary
 	/// </summary>
 	/// <param name="srcDocName">來源範本別名</param>
-	public Dictionary<int, Paragraph> CopyBlockDict(string srcDocName, string blockName) {
+	public Dictionary<int, OpenXmlElement> CopyBlockDict(string srcDocName, string blockName) {
 		try {
 			WordprocessingDocument srcDoc = tplDoc[srcDocName];
-			Dictionary<int, Paragraph> dictElement = new Dictionary<int, Paragraph>();
+			Dictionary<int, OpenXmlElement> dictElement = new Dictionary<int, OpenXmlElement>();
 
 			foreach (var x in CopyBlockList(srcDocName, blockName).Select((Entry, Index) => new { Entry, Index })) {
 				dictElement.Add(x.Index + 1, x.Entry);
@@ -242,7 +245,7 @@ public class OpenXmlHelper {
 	public void CopyReplaceBlock(string srcDocName, string blockName, Dictionary<string, string> mappingDic) {
 		int i = 0;
 		try {
-			List<Paragraph> pars = CopyBlockList(srcDocName, blockName);
+			List<OpenXmlElement> pars = CopyBlockList(srcDocName, blockName);
 			for (i=0; i < pars.Count; i++) {
 				string tmpInnerText = pars[i].InnerText;
 				foreach (var item in mappingDic) {
