@@ -10,7 +10,7 @@
 	protected string in_no = "";
 	protected string branch = "";
 
-	protected IpoReport ipoRpt = null;
+	protected IPOReport ipoRpt = null;
 
 	private void Page_Load(System.Object sender, System.EventArgs e) {
 		Response.CacheControl = "Private";
@@ -23,7 +23,7 @@
 		branch = (Request["branch"] ?? "").ToString();//N
 
 		try {
-			ipoRpt = new IpoReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch);
+			ipoRpt = new IPOReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch);
 			WordOut();
 		}
 		finally {
@@ -129,11 +129,9 @@
 
 
 			bool baseflag = true;//是否產生基本資料表
+			ipoRpt.CopyPageFoot("apply", baseflag);//申請書頁尾
 			if (baseflag) {
-				ipoRpt.CopyPageFoot("apply", baseflag);//申請書頁尾
 				ipoRpt.AppendBaseData("base", "新型創作人");//產生基本資料表
-			} else {
-				ipoRpt.CopyPageFoot("apply", baseflag);//申請書頁尾
 			}
 		}
 

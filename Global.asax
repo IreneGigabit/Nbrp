@@ -79,7 +79,29 @@
         Session["BranchOLDB"] = System.Configuration.ConfigurationManager.ConnectionStrings["ODBCBranchCnnstringTest"].ToString();
 		Session["HeadOLDB"] = System.Configuration.ConfigurationManager.ConnectionStrings["ODBCHeadCnnstringTest"].ToString();
 		Session["imarraccount"] = System.Configuration.ConfigurationManager.ConnectionStrings["maccount"].ToString();//智產會計系統
-		Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["dev_btbrtdb"].ToString();//案件資料使用
+		//案件系統
+		switch (Request.ServerVariables["HTTP_HOST"].ToString().ToUpper())
+		{
+			case "WEB10":
+				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["test_N_btbrtdb"].ToString();//使用者測試環境
+				break;
+			case "SINN05":
+				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["prod_N_btbrtdb"].ToString();//正式環境
+				break;
+			case "SIC08":
+				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["prod_C_btbrtdb"].ToString();//正式環境
+				break;
+			case "SIS08":
+				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["prod_S_btbrtdb"].ToString();//正式環境
+				break;
+			case "SIK08":
+				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["prod_K_btbrtdb"].ToString();//正式環境
+				break;
+			default:
+				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["dev_btbrtdb"].ToString();//開發環境
+				break;
+		}
+
 		Session["debit"] = "";//抓資料使用
         Session["Password"] = false;
         Session["UserID"] = Session.SessionID.ToString();

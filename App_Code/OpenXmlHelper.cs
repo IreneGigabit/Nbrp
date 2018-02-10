@@ -338,9 +338,9 @@ public class OpenXmlHelper {
 
 		string newRefId = string.Format("foot_{0}", Guid.NewGuid().ToString().Substring(0, 8));
 
-		FooterReference[] footerSections = sourceDoc.MainDocumentPart.RootElement.Descendants<FooterReference>().ToArray();
-		string srcRefId = footerSections[index].Id;
-		footerSections[index].Id = newRefId;
+		FooterReference[] footer = sourceDoc.MainDocumentPart.RootElement.Descendants<FooterReference>().ToArray();
+		string srcRefId = footer[index].Id;
+		footer[index].Id = newRefId;
 
 		FooterPart elementFoot = sourceDoc.MainDocumentPart.FooterParts
 		.Where(
@@ -348,10 +348,21 @@ public class OpenXmlHelper {
 		).SingleOrDefault();
 		outDoc.MainDocumentPart.AddPart(elementFoot, newRefId);
 
-		if (isNewChapter)
-			outBody.AppendChild(new Paragraph(new ParagraphProperties(footerSections[index].Parent.CloneNode(true))));//頁尾+分節符號
-		else
-			outBody.AppendChild(footerSections[index].Parent.CloneNode(true));//頁尾
+		if (isNewChapter) {
+			//outBody.AppendChild(new Paragraph(new ParagraphProperties(footer[index].Parent.CloneNode(true))));//頁尾+分節符號
+			//throw new Exception(footer[index].Parent.InnerXml);
+			outBody.Append(new Paragraph(new ParagraphProperties(footer[index].Parent.CloneNode(true))));//頁尾+分節符號
+			//OpenXmlElement[] elements = footerSections[index].Parent.Descendants().ToArray();
+			//Paragraph par = new Paragraph();
+			//ParagraphProperties section = new ParagraphProperties();
+			//foreach (var item in elements) {
+			//	section.AppendChild(item.CloneNode(true));
+			//}
+			//par.AppendChild(section.CloneNode(true));
+			//outBody.AppendChild(par.CloneNode(true));//頁尾+分節符號
+		} else {
+			outBody.AppendChild(footer[index].Parent.CloneNode(true));//頁尾
+		}
 	}
 	#endregion
 
