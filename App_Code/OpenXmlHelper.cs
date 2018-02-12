@@ -111,7 +111,7 @@ public class OpenXmlHelper {
 		HttpContext.Current.Response.ContentType = "application/octet-stream";
 		HttpContext.Current.Response.AddHeader("Content-Length", outMem.Length.ToString());
 		HttpContext.Current.Response.BinaryWrite(outMem.ToArray());
-		this.Dispose();
+		//this.Dispose();
 	}
 	#endregion
 

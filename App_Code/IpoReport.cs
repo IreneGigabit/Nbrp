@@ -32,6 +32,11 @@ public class IPOReport : OpenXmlHelper {
 	}
 
 	/// <summary>
+	/// 收據種類
+	/// </summary>
+	public string RectitleTitle { get; set; }
+
+	/// <summary>
 	/// 收據抬頭
 	/// </summary>
 	public string RectitleName {
@@ -88,6 +93,26 @@ public class IPOReport : OpenXmlHelper {
 		this._in_no = in_no;
 		this._in_scode = in_scode;
 		this._branch = branch;
+		this._conn = new DBHelper(connStr, false).Debug(false);
+
+		this._dtDmp = new DataTable();
+		_conn.DataTable("select * from vdmpall where in_scode='" + _in_scode + "' and in_no='" + _in_no + "'", _dtDmp);//抓案件資料
+
+		SetSeq();//組案件編號
+		SetRectitleName();//抓收據抬頭
+		SetApcust();//抓申請人
+		SetAgent();//抓代理人
+		SetAnt();//抓發明人/新型創作/設計人
+		SetPrior();//抓優先權
+	}
+
+	//電子收據第2階段上線後要廢除RectitleTitle參數
+	public IPOReport(string connStr, string in_scode, string in_no, string branch, string rectitle) {
+		this._connStr = connStr;
+		this._in_no = in_no;
+		this._in_scode = in_scode;
+		this._branch = branch;
+		this.RectitleTitle = rectitle;
 		this._conn = new DBHelper(connStr, false).Debug(false);
 
 		this._dtDmp = new DataTable();
@@ -161,6 +186,15 @@ public class IPOReport : OpenXmlHelper {
 				}
 			}
 
+			if (this.RectitleTitle == "A") {//專利權人
+				RectitleName = Cname_string;
+			} else if (this.RectitleTitle == "C") {//專利權人(代繳人)
+				RectitleName = Cname_string + "(代繳人：聖島國際專利商標聯合事務所)";
+			} else {//空白
+				RectitleName = "";
+			}
+
+			/*
 			string receipt_title = _dtDmp.Rows[0]["receipt_title"].ToString();
 			if (receipt_title == "A") {//專利權人
 				RectitleName = Cname_string;
@@ -168,7 +202,7 @@ public class IPOReport : OpenXmlHelper {
 				RectitleName = Cname_string + "(代繳人：聖島國際專利商標聯合事務所)";
 			} else if (receipt_title == "B") {//空白
 				RectitleName = "";
-			}
+			}*/
 		}
 
 		this.RectitleName = RectitleName;
@@ -396,6 +430,19 @@ public class IPOReport : OpenXmlHelper {
 		}
 
 		CopyPageFoot(baseDocName, false);//頁尾
+	}
+	#endregion
+
+	#region 更新列印狀態
+	/// <summary>
+	/// 更新列印狀態
+	/// </summary>
+	public void SetPrint() {
+		string SQL = "update case_dmp set new='P'+substring(NEW,2,50) " +
+					",receipt_title='" + this.RectitleTitle + "' " +
+					",rectitle_name='" + this.RectitleName + "' " +
+					"where in_scode='" + this._in_scode + "' and in_no='" + this._in_no + "'";
+		_conn.ExecuteNonQuery(SQL);
 	}
 	#endregion
 }
