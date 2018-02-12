@@ -21,9 +21,11 @@
 		in_scode = (Request["in_scode"] ?? "").ToString();//n100
 		in_no = (Request["in_no"] ?? "").ToString();//20170103001
 		branch = (Request["branch"] ?? "").ToString();//N
+		string rectitle = (Request["receipt_title"] ?? "").ToString();//N
 
 		try {
-			ipoRpt = new IPOReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch);
+			//電子收據第2階段上線後要廢除RectitleTitle參數
+			ipoRpt = new IPOReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch, rectitle);
 			WordOut();
 		}
 		finally {
@@ -118,5 +120,6 @@
 		} else {
 			ipoRpt.Flush(Request["se_scode"] + "-IH1_patent_form.docx");
 		}
+		ipoRpt.SetPrint();
 	}
 </script>
