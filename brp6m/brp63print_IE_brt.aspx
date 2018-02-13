@@ -74,8 +74,8 @@
 		ipoRpt.CopyPageFoot("apply",true);//頁尾+換頁
 		
 		//基本資料表
-		ipoRpt.CopyBlock("base_title");//抬頭
-		ipoRpt.CopyBlock("base_apcust");//申請人
+		ipoRpt.CopyBlock("base","base_title");//抬頭
+		ipoRpt.CopyBlock("base", "base_apcust");//申請人
 		ipoRpt.ReplaceBookmark("apcountry", "TW中華民國");
 		ipoRpt.ReplaceBookmark("apclass", "法人公司機關學校");
 		ipoRpt.ReplaceBookmark("apcust_no", "04322046");
@@ -88,7 +88,7 @@
 		ipoRpt.ReplaceBookmark("ap_addr", "高雄市大樹區學城路1段9、13、15、17、19、21、23號");
 		ipoRpt.ReplaceBookmark("ap_crep", "堃峯");
 		ipoRpt.ReplaceBookmark("ap_erep", "Lee &Richard");
-		ipoRpt.CopyBlock("base_agent");//代理人
+		ipoRpt.CopyBlock("base", "base_agent");//代理人
 		ipoRpt.ReplaceBookmark("agt_id1", "B100379440");
 		ipoRpt.ReplaceBookmark("agt_name1", "高,玉駿");
 		ipoRpt.ReplaceBookmark("agt_zip1", "105");
