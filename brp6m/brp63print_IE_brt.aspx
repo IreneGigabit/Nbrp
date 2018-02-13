@@ -31,8 +31,6 @@
 		try {
 			//Response.Write(("&#153706;瑄&#153706;").ToXmlUnicode());
 			//Response.Write(Convert.ToChar((int)153706));
-			Response.Write(char.MaxValue);
-			Response.End();
 			string dbSession = (Session["btbrtdb"] ?? "Server=web08;Database=sindbs;User ID=web_usr;Password=web1823").ToString();
 			//ipoRpt = new IpoReport(dbSession, in_scode, in_no, branch);
 			ipoRpt = new IPOReport();
@@ -45,7 +43,7 @@
 
 	protected void WordOut() {
 		Dictionary<string, string> _TemplateFileList = new Dictionary<string, string>();
-		_TemplateFileList.Add("apply", Server.MapPath("~/ReportTemplate") + @"\FE9團體標章註冊申請書.docx");
+		_TemplateFileList.Add("apply", Server.MapPath("~/ReportTemplate") + @"\14衍生設計專利改請設計專利申請書DH1.docx");
 		_TemplateFileList.Add("base", Server.MapPath("~/ReportTemplate") + @"\00基本資料表.docx");
 		ipoRpt.CloneFromFile(_TemplateFileList, true);
 		

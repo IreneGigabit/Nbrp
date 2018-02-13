@@ -346,9 +346,29 @@ public class OpenXmlHelper {
 		.Where(
 			element => sourceDoc.MainDocumentPart.GetIdOfPart(element) == srcRefId
 		).SingleOrDefault();
+
 		outDoc.MainDocumentPart.AddPart(elementFoot, newRefId);
 
 		if (isNewChapter) {
+			FooterPart fp = outDoc.MainDocumentPart.FooterParts
+			.Where(
+				element => outDoc.MainDocumentPart.GetIdOfPart(element) == newRefId
+			).SingleOrDefault();
+			ParagraphStyleId pStyle = fp.Footer.Descendants<ParagraphStyleId>().First();
+			string oldStyleId = pStyle.Val;
+			string newStyleId = string.Format("fs_{0}", Guid.NewGuid().ToString().Substring(0, 8));
+			pStyle.Val = newStyleId;
+
+			StylesPart srcPart = sourceDoc.MainDocumentPart.StyleDefinitionsPart;
+			Style st = srcPart.Styles.Descendants<Style>()
+			.Where(
+				element => element.StyleId == oldStyleId
+			).SingleOrDefault();
+			st.StyleId = newStyleId;
+
+			StylesPart outPart = outDoc.MainDocumentPart.StyleDefinitionsPart;
+			outPart.Styles.Append(st.CloneNode(true));
+
 			//outBody.AppendChild(new Paragraph(new ParagraphProperties(footer[index].Parent.CloneNode(true))));//頁尾+分節符號
 			//throw new Exception(footer[index].Parent.InnerXml);
 			outBody.Append(new Paragraph(new ParagraphProperties(footer[index].Parent.CloneNode(true))));//頁尾+分節符號
