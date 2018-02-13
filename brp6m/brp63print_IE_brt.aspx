@@ -88,20 +88,24 @@
 		ipoRpt.ReplaceBookmark("ap_addr", "高雄市大樹區學城路1段9、13、15、17、19、21、23號");
 		ipoRpt.ReplaceBookmark("ap_crep", "堃峯");
 		ipoRpt.ReplaceBookmark("ap_erep", "Lee &Richard");
+		
 		ipoRpt.CopyBlock("base", "base_agent");//代理人
+		ipoRpt.ReplaceBookmark("agt_idno1", "");
 		ipoRpt.ReplaceBookmark("agt_id1", "B100379440");
-		ipoRpt.ReplaceBookmark("agt_name1", "高,玉駿");
+		ipoRpt.ReplaceBookmark("base_agt_name1", "高,玉駿");
 		ipoRpt.ReplaceBookmark("agt_zip1", "105");
-		ipoRpt.ReplaceBookmark("agt_addr1", "高,玉駿");
+		ipoRpt.ReplaceBookmark("agt_addr1", "台北市松山區南京東路270號11樓之1");
 		ipoRpt.ReplaceBookmark("agatt_tel1", "02-77028299#261");
 		ipoRpt.ReplaceBookmark("agatt_fax1", "02-77028289");
+		
+		ipoRpt.ReplaceBookmark("agt_idno2", "");
 		ipoRpt.ReplaceBookmark("agt_id2", "M120741174");
-		ipoRpt.ReplaceBookmark("agt_name2", "楊,祺雄");
+		ipoRpt.ReplaceBookmark("base_agt_name2", "楊,祺雄");
 		ipoRpt.ReplaceBookmark("agt_zip2", "105");
-		ipoRpt.ReplaceBookmark("agt_addr2", "高,玉駿");
+		ipoRpt.ReplaceBookmark("agt_addr2", "台北市松山區南京東路270號11樓之1");
 		ipoRpt.ReplaceBookmark("agatt_tel2", "02-77028299#261");
 		ipoRpt.ReplaceBookmark("agatt_fax2", "02-77028289");
-		//ipoRpt.AppendFoot(1);//頁尾
+		ipoRpt.AppendFoot(1);//頁尾
 		ipoRpt.CopyPageFoot("base", false);//頁尾
 		
 		ipoRpt.Flush("[團體標章註冊申請書]-NT66824.docx");

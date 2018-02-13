@@ -315,6 +315,8 @@ public class OpenXmlHelper {
 								break;
 						}
 					}
+					//if (bookmarkName.ToLower() == "agt_zip1")
+					//	throw new Exception("agt_zip1=" + id + " vs " + bookmarkEnd.Id);
 					bookmarkStart.Remove();
 					if (bookmarkEnd != null) bookmarkEnd.Remove();
 				}
@@ -336,32 +338,18 @@ public class OpenXmlHelper {
 		WordprocessingDocument sourceDoc = tplDoc[srcDocName];
 		int index = 0;//取消index參數,只抓第1個
 
-		string newRefId = string.Format("foot_{0}", Guid.NewGuid().ToString().Substring(0, 8));
-
 		FooterReference[] footer = sourceDoc.MainDocumentPart.RootElement.Descendants<FooterReference>().ToArray();
-		string srcRefId = footer[index].Id;
-		footer[index].Id = newRefId;
+		if (srcDocName != defTplDocName) {
+			string newRefId = string.Format("foot_{0}", Guid.NewGuid().ToString().Substring(0, 8));
+			string srcRefId = footer[index].Id;
+			footer[index].Id = newRefId;
+			FooterPart elementFoot = sourceDoc.MainDocumentPart.FooterParts
+			.Where(
+				element => sourceDoc.MainDocumentPart.GetIdOfPart(element) == srcRefId
+			).SingleOrDefault();
+		
+			outDoc.MainDocumentPart.AddPart(elementFoot, newRefId);
 
-		FooterPart elementFoot = sourceDoc.MainDocumentPart.FooterParts
-		.Where(
-			element => sourceDoc.MainDocumentPart.GetIdOfPart(element) == srcRefId
-		).SingleOrDefault();
-
-		outDoc.MainDocumentPart.AddPart(elementFoot, newRefId);
-
-		if (isNewChapter) {
-			//outBody.AppendChild(new Paragraph(new ParagraphProperties(footer[index].Parent.CloneNode(true))));//頁尾+分節符號
-			//throw new Exception(footer[index].Parent.InnerXml);
-			outBody.Append(new Paragraph(new ParagraphProperties(footer[index].Parent.CloneNode(true))));//頁尾+分節符號
-			//OpenXmlElement[] elements = footerSections[index].Parent.Descendants().ToArray();
-			//Paragraph par = new Paragraph();
-			//ParagraphProperties section = new ParagraphProperties();
-			//foreach (var item in elements) {
-			//	section.AppendChild(item.CloneNode(true));
-			//}
-			//par.AppendChild(section.CloneNode(true));
-			//outBody.AppendChild(par.CloneNode(true));//頁尾+分節符號
-		} else {
 			FooterPart fp = outDoc.MainDocumentPart.FooterParts
 			.Where(
 				element => outDoc.MainDocumentPart.GetIdOfPart(element) == newRefId
@@ -370,17 +358,22 @@ public class OpenXmlHelper {
 			string oldStyleId = pStyle.Val;
 			string newStyleId = string.Format("fs_{0}", Guid.NewGuid().ToString().Substring(0, 8));
 			pStyle.Val = newStyleId;
-			
+
 			StylesPart srcPart = sourceDoc.MainDocumentPart.StyleDefinitionsPart;
 			Style st = srcPart.Styles.Descendants<Style>()
 			.Where(
 				element => element.StyleId == oldStyleId
 			).SingleOrDefault();
 			st.StyleId = newStyleId;
-			
+
 			StylesPart outPart = outDoc.MainDocumentPart.StyleDefinitionsPart;
 			outPart.Styles.Append(st.CloneNode(true));
+		}
 
+		if (isNewChapter) {
+			//outBody.AppendChild(new Paragraph(new ParagraphProperties(footer[index].Parent.CloneNode(true))));//頁尾+分節符號
+			outBody.Append(new Paragraph(new ParagraphProperties(footer[index].Parent.CloneNode(true))));//頁尾+分節符號
+		} else {
 			outBody.AppendChild(footer[index].Parent.CloneNode(true));//頁尾
 		}
 	}
