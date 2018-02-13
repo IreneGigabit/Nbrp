@@ -70,7 +70,6 @@
 		ipoRpt.ReplaceBookmark("rectitle_name", "英業達股份有限公司");
 		ipoRpt.CopyBlock("b_attach");//附送書件
 		ipoRpt.CopyBlock("b_statement");//聲明內容
-		//ipoRpt.AppendNewPageFoot(0);//頁尾+換頁
 		ipoRpt.CopyPageFoot("apply",true);//頁尾+換頁
 		
 		//基本資料表
@@ -105,7 +104,6 @@
 		ipoRpt.ReplaceBookmark("agt_addr2", "台北市松山區南京東路270號11樓之1");
 		ipoRpt.ReplaceBookmark("agatt_tel2", "02-77028299#261");
 		ipoRpt.ReplaceBookmark("agatt_fax2", "02-77028289");
-		ipoRpt.AppendFoot(1);//頁尾
 		ipoRpt.CopyPageFoot("base", false);//頁尾
 		
 		ipoRpt.Flush("[團體標章註冊申請書]-NT66824.docx");
