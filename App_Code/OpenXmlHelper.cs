@@ -275,16 +275,17 @@ public class OpenXmlHelper {
 	public void ReplaceBookmark(string bookmarkName, string text) {
 		try {
 			MainDocumentPart mainPart = outDoc.MainDocumentPart;
-			IEnumerable<BookmarkEnd> bookMarkEnds = mainPart.RootElement.Descendants<BookmarkEnd>();
+			//IEnumerable<BookmarkEnd> bookMarkEnds = mainPart.RootElement.Descendants<BookmarkEnd>();
 			foreach (BookmarkStart bookmarkStart in mainPart.RootElement.Descendants<BookmarkStart>()) {
 				if (bookmarkStart.Name.Value.ToLower() == bookmarkName.ToLower()) {
 					string id = bookmarkStart.Id.Value;
-					//BookmarkEnd bookmarkEnd = bookMarkEnds.Where(i => i.Id.Value == id).First();
-					BookmarkEnd bookmarkEnd = bookMarkEnds.Where(i => i.Id.Value == id).FirstOrDefault();
+					//BookmarkEnd bookmarkEnd = bookMarkEnds.Where(i => i.Id.Value == id).FirstOrDefault();
+					BookmarkEnd bookmarkEnd = bookmarkStart.Parent.Descendants<BookmarkEnd>().Where(i => i.Id.Value == id).FirstOrDefault();
 
-					////var bookmarkText = bookmarkEnd.NextSibling();
+					////留第一個run其他run刪除
 					//Run bookmarkRun = bookmarkStart.NextSibling<Run>();
 					//if (bookmarkRun != null) {
+					//	Run tplRun = bookmarkRun;
 					//	string[] txtArr = text.Split('\n');
 					//	for (int i = 0; i < txtArr.Length; i++) {
 					//		if (i == 0) {
@@ -294,29 +295,43 @@ public class OpenXmlHelper {
 					//			bookmarkRun.Append(new Text(txtArr[i]));
 					//		}
 					//	}
+					//	int j = 0;
+					//	while (tplRun.NextSibling() != null && tplRun.NextSibling().GetType() != typeof(BookmarkEnd)) {
+					//		j++;
+					//		tplRun.NextSibling().Remove();
+					//		if (j >= 20)
+					//			break;
+					//	}
 					//}
-					Run bookmarkRun = bookmarkStart.NextSibling<Run>();
-					if (bookmarkRun != null) {
-						Run tplRun = bookmarkRun;
-						string[] txtArr = text.Split('\n');
-						for (int i = 0; i < txtArr.Length; i++) {
-							if (i == 0) {
-								bookmarkRun.GetFirstChild<Text>().Text = txtArr[i];
+					//留第一個run其他run刪除,刪到BookmarkEnd為止
+					OpenXmlElement[] bookmarkItems = bookmarkStart.Parent.ChildElements.ToArray();
+					bool canRemove = false;
+					int bIndex = 0;
+					foreach (OpenXmlElement item in bookmarkItems) {
+						if (item.GetType() == typeof(BookmarkEnd)) {
+							break;
+						} 
+						if (canRemove && item.GetType() == typeof(Run)) {
+							if (bIndex == 0) {
+								string[] txtArr = text.Split('\n');
+								for (int i = 0; i < txtArr.Length; i++) {
+									if (i == 0) {
+										item.GetFirstChild<Text>().Text = txtArr[i];
+									} else {
+										item.Append(new Break());
+										item.Append(new Text(txtArr[i]));
+									}
+								}
 							} else {
-								bookmarkRun.Append(new Break());
-								bookmarkRun.Append(new Text(txtArr[i]));
+							item.Remove();
 							}
+							bIndex++;
 						}
-						int j = 0;
-						while (tplRun.NextSibling() != null && tplRun.NextSibling().GetType() != typeof(BookmarkEnd)) {
-							j++;
-							tplRun.NextSibling().Remove();
-							if (j >= 20)
-								break;
+						if (item.GetType() == typeof(BookmarkStart)) {
+							canRemove = true;
 						}
 					}
-					//if (bookmarkName.ToLower() == "agt_zip1")
-					//	throw new Exception("agt_zip1=" + id + " vs " + bookmarkEnd.Id);
+
 					bookmarkStart.Remove();
 					if (bookmarkEnd != null) bookmarkEnd.Remove();
 				}
