@@ -378,19 +378,19 @@ public class IPOReport : OpenXmlHelper {
 			ReplaceBookmark("base_ap_cname_title", Apcust.Rows[i]["Title_cname"].ToString());
 			ReplaceBookmark("base_ap_ename_title", Apcust.Rows[i]["Title_ename"].ToString());
 			ReplaceBookmark("base_ap_cname", Apcust.Rows[i]["Cname_string"].ToString().ToXmlUnicode());
-			ReplaceBookmark("base_ap_ename", Apcust.Rows[i]["Ename_string"].ToString().ToXmlUnicode());
+			ReplaceBookmark("base_ap_ename", Apcust.Rows[i]["Ename_string"].ToString().ToXmlUnicode(true));
 			ReplaceBookmark("ap_live_country", Apcust.Rows[i]["Country_name"].ToString());
 			ReplaceBookmark("ap_zip", Apcust.Rows[i]["ap_zip"].ToString());
 			string ap_addr = Apcust.Rows[i]["ap_addr1"].ToString().ToXmlUnicode()
 				+ Apcust.Rows[i]["ap_addr2"].ToString().ToXmlUnicode();
 			ReplaceBookmark("ap_addr", ap_addr);
-			string ap_eddr = Apcust.Rows[i]["ap_eaddr1"].ToString().ToXmlUnicode()
-				+ Apcust.Rows[i]["ap_eaddr2"].ToString().ToXmlUnicode()
-				+ Apcust.Rows[i]["ap_eaddr3"].ToString().ToXmlUnicode()
-				+ Apcust.Rows[i]["ap_eaddr4"].ToString().ToXmlUnicode();
+			string ap_eddr = Apcust.Rows[i]["ap_eaddr1"].ToString().ToXmlUnicode(true)
+				+ Apcust.Rows[i]["ap_eaddr2"].ToString().ToXmlUnicode(true)
+				+ Apcust.Rows[i]["ap_eaddr3"].ToString().ToXmlUnicode(true)
+				+ Apcust.Rows[i]["ap_eaddr4"].ToString().ToXmlUnicode(true);
 			ReplaceBookmark("ap_eddr", ap_eddr);
 			ReplaceBookmark("ap_crep", Apcust.Rows[i]["ap_crep"].ToString().ToXmlUnicode());
-			ReplaceBookmark("ap_erep", Apcust.Rows[i]["ap_erep"].ToString().ToXmlUnicode());
+			ReplaceBookmark("ap_erep", Apcust.Rows[i]["ap_erep"].ToString().ToXmlUnicode(true));
 		}
 		//代理人
 		CopyBlock(baseDocName, "base_agent");
@@ -424,7 +424,7 @@ public class IPOReport : OpenXmlHelper {
 				}
 				CopyBlock(baseDocName, "base_ant3");
 				ReplaceBookmark("base_ant_cname", Ant.Rows[i]["Cname_string"].ToString().ToXmlUnicode());
-				ReplaceBookmark("base_ant_ename", Ant.Rows[i]["Ename_string"].ToString().ToXmlUnicode());
+				ReplaceBookmark("base_ant_ename", Ant.Rows[i]["Ename_string"].ToString().ToXmlUnicode(true));
 				AddParagraph();
 			}
 		}
