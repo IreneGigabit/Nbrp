@@ -116,7 +116,7 @@
 			}
 		}
 
-		ipoRpt.Flush(ipoRpt.Seq + "-衍生DE3.docx");
+		ipoRpt.Flush(ipoRpt.Seq + "-衍生.docx");
 		ipoRpt.SetPrint();
 	}
 </script>

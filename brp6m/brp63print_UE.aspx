@@ -137,7 +137,7 @@
 			}
 		}
 
-		ipoRpt.Flush(ipoRpt.Seq + "-新型UE.docx");
+		ipoRpt.Flush(ipoRpt.Seq + "-新型.docx");
 		ipoRpt.SetPrint();
 	}
 </script>

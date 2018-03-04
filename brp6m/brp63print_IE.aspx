@@ -144,7 +144,7 @@
 			}
 		}
 
-		ipoRpt.Flush(ipoRpt.Seq + "-發明IE.docx");
+		ipoRpt.Flush(ipoRpt.Seq + "-發明.docx");
 		ipoRpt.SetPrint();
 	}
 </script>

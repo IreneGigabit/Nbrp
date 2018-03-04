@@ -102,7 +102,7 @@
 			}
 		}
 
-		ipoRpt.Flush(ipoRpt.Seq + "-[專利補正文件申請書]WMA1.docx");
+		ipoRpt.Flush(ipoRpt.Seq + "-[專利補正文件申請書].docx");
 		ipoRpt.SetPrint();
 	}
 </script>

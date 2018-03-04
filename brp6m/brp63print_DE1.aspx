@@ -116,7 +116,7 @@
 			}
 		}
 
-		ipoRpt.Flush(ipoRpt.Seq + "-設計DE1.docx");
+		ipoRpt.Flush(ipoRpt.Seq + "-設計.docx");
 		ipoRpt.SetPrint();
 	}
 </script>

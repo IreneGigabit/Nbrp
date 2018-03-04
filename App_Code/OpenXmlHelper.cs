@@ -27,6 +27,8 @@ public class OpenXmlHelper {
 	protected string defTplDocName = "";
 	Dictionary<string, MemoryStream> tplMem = new Dictionary<string, MemoryStream>();
 
+	public Table tmpTable = null;
+
 	public OpenXmlHelper() {
 	}
 
@@ -641,6 +643,52 @@ public class OpenXmlHelper {
 		return this;
 	}
 	#endregion
+
+	#region 複製Table
+	/// <summary>
+	/// Table
+	/// </summary>
+	/// <param name="srcDocName">來源範本別名</param>
+	public void CopyTable(string blockName) {
+		CopyTable(defTplDocName, blockName);
+	}
+	public void CopyTable(string srcDocName, string blockName) {
+		try {
+			WordprocessingDocument srcDoc = tplDoc[srcDocName];
+			List<OpenXmlElement> arrElement = new List<OpenXmlElement>();
+			Tag elementTag = srcDoc.MainDocumentPart.RootElement.Descendants<Tag>()
+			.Where(
+				element => element.Val.Value.ToLower() == blockName.ToLower()
+			).SingleOrDefault();
+
+			if (elementTag != null) {
+				SdtElement block = (SdtElement)elementTag.Parent.Parent;
+				SdtContentBlock blockCont = block.Descendants<SdtContentBlock>().FirstOrDefault();
+				if (blockCont != null) {
+					tmpTable = blockCont.Descendants<Table>().FirstOrDefault();
+				}
+			}
+		}
+		catch (Exception ex) {
+			throw new Exception("複製Table錯誤!!(" + blockName + ")", ex);
+		}
+	}
+	public void PastTable() {
+		if (tmpTable != null) {
+			outBody.AppendChild(tmpTable.CloneNode(true));
+		}
+	}
+	public void AddTableRow() {
+		if (tmpTable != null) {
+			TableRow row = (TableRow)tmpTable.Descendants<TableRow>().LastOrDefault().CloneNode(true);
+			while (row.Descendants<Text>().FirstOrDefault()!=null) {
+				row.Descendants<Text>().FirstOrDefault().Remove();
+			}
+			tmpTable.AppendChild(row.CloneNode(true));
+		}
+	}
+	#endregion
+
 }
 
 #region ImageFile

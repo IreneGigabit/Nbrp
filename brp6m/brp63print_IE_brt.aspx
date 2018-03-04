@@ -4,12 +4,6 @@
 <%@ Import Namespace = "System.IO"%>
 <%@ Import Namespace = "System.Linq"%>
 <%@ Import Namespace = "System.Collections.Generic"%>
-<%@ Import Namespace = "DocumentFormat.OpenXml"%>
-<%@ Import Namespace = "DocumentFormat.OpenXml.Packaging"%>
-<%@ Import Namespace = "DocumentFormat.OpenXml.Wordprocessing"%>
-<%@ Import Namespace = "A=DocumentFormat.OpenXml.Drawing" %>
-<%@ Import Namespace = "DW=DocumentFormat.OpenXml.Drawing.Wordprocessing"%>
-<%@ Import Namespace = "PIC=DocumentFormat.OpenXml.Drawing.Pictures"%>
 
 <script runat="server">
 	protected string in_scode = "";
@@ -43,7 +37,7 @@
 
 	protected void WordOut() {
 		Dictionary<string, string> _TemplateFileList = new Dictionary<string, string>();
-		_TemplateFileList.Add("apply", Server.MapPath("~/ReportTemplate") + @"\14衍生設計專利改請設計專利申請書DH1.docx");
+		_TemplateFileList.Add("apply", Server.MapPath("~/ReportTemplate") + @"\FE9團體標章註冊申請書.docx");
 		_TemplateFileList.Add("base", Server.MapPath("~/ReportTemplate") + @"\00基本資料表.docx");
 		ipoRpt.CloneFromFile(_TemplateFileList, true);
 		
@@ -70,6 +64,11 @@
 		ipoRpt.ReplaceBookmark("rectitle_name", "英業達股份有限公司");
 		ipoRpt.CopyBlock("b_attach");//附送書件
 		ipoRpt.CopyBlock("b_statement");//聲明內容
+		//ipoRpt.CopyBlock("b_table");
+		ipoRpt.CopyTable("b_table");
+		ipoRpt.AddTableRow();
+		ipoRpt.PastTable();
+		
 		ipoRpt.CopyPageFoot("apply",true);//頁尾+換頁
 		
 		//基本資料表
