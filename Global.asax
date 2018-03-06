@@ -61,13 +61,8 @@
 
 	void Application_Error(object sender, EventArgs e)  {
 		// 發生未處理錯誤時執行的程式碼
-		// for IIS 6.0 (Windows 2003 Server)
-		//Exception exObj = Server.GetLastError();
-		//if (exObj is HttpUnhandledException)
-		//{
-		//	int hcode = ((HttpUnhandledException)exObj).GetHttpCode();
-		//	if (hcode == 500) Server.Transfer("~/500-error.aspx");
-		//}
+		//Exception ex = Server.GetLastError();
+		//server_code.exceptionLog(ex);//寫入LOG
 	}
 
 	void Session_Start(object sender, EventArgs e) {

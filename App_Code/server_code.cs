@@ -1,12 +1,65 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web;
+using System.IO;
+using System.Threading;
 
 /// <summary>
 /// server_code 的摘要描述
 /// </summary>
 public static class server_code {
+	static string SiteDir = HttpContext.Current.Request.PhysicalApplicationPath;
+
+	private static object lockObject = new object();
+
+	#region 產出Exception log
+	public static void exceptionLog(Exception ex) {
+		exceptionLog(ex, "");
+	}
+
+	public static void exceptionLog(Exception ex, string sql) {
+		string Message = "";
+
+		if (sql != "") {
+			Message = "發生錯誤的網頁:{0}\n錯誤訊息:{1}\nSQL:\n{2}\n堆疊內容:\n{3}\n";
+			Message = String.Format(Message, HttpContext.Current.Request.Path, ex.GetBaseException().Message, sql, ex.StackTrace);
+		} else {
+			Message = "發生錯誤的網頁:{0}\n錯誤訊息:{1}\n堆疊內容:\n{3}\n";
+			Message = String.Format(Message, HttpContext.Current.Request.Path, ex.GetBaseException().Message, ex.StackTrace);
+		}
+
+		writeLog(Message);
+	}
+	#endregion
+
+	#region 寫入log
+	public static void writeLog(string detailDesc) {
+		Monitor.Enter(lockObject);
+		StreamWriter sw = null;
+		try {
+			string Path = string.Format(@"{0}Logs\{1}\", SiteDir, DateTime.Now.ToString("yyyy"));
+			if (!Directory.Exists(Path)) {
+				Directory.CreateDirectory(Path);
+			}
+
+			string logFile = Path + DateTime.Now.ToString("yyyyMMdd") + ".txt";
+			string fullText = "";
+			if (detailDesc == "")
+				fullText = "";
+			else
+				fullText = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + "\n" + detailDesc;
+
+			sw = File.AppendText(logFile);
+			sw.WriteLine(fullText);
+			sw.Flush();
+		}
+		finally {
+			Monitor.Exit(lockObject);
+			if (sw != null) sw.Close();
+		}
+	}
+	#endregion
+
 	public static string Left(this string str, int ln) {
 		string sret = str.Substring(0, Math.Min(ln, str.Length));
 		return sret;
