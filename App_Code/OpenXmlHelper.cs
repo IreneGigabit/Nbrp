@@ -395,89 +395,6 @@ public class OpenXmlHelper {
 		}
 	}
 	#endregion
-
-	#region 插入圖片
-	/// <summary>
-	/// 插入圖片
-	/// </summary>
-	//public void AppendImage(string imgStr, bool isBase64, decimal scale) {
-	//	ImageData img= new ImageData(imgStr, isBase64, scale);
-	public void AppendImage(ImageFile img) {
-		ImagePart imagePart = outDoc.MainDocumentPart.AddImagePart(ImagePartType.Jpeg);
-		string relationshipId = outDoc.MainDocumentPart.GetIdOfPart(imagePart);
-		imagePart.FeedData(img.getDataStream());
-
-		// Define the reference of the image.
-		var element =
-			 new Drawing(
-				 new DW.Inline(
-					//Size of image, unit = EMU(English Metric Unit)
-					//1 cm = 360000 EMUs
-					 new DW.Extent() { Cx = img.GetWidthInEMU(), Cy = img.GetHeightInEMU() },
-					 new DW.EffectExtent()
-					 {
-						 LeftEdge = 0L,
-						 TopEdge = 0L,
-						 RightEdge = 0L,
-						 BottomEdge = 0L
-					 },
-					 new DW.DocProperties()
-					 {
-						 Id = (UInt32Value)1U,
-						 Name = img.ImageName
-					 },
-					 new DW.NonVisualGraphicFrameDrawingProperties(
-						 new A.GraphicFrameLocks() { NoChangeAspect = true }),
-					 new A.Graphic(
-						 new A.GraphicData(
-							 new PIC.Picture(
-								 new PIC.NonVisualPictureProperties(
-									 new PIC.NonVisualDrawingProperties()
-									 {
-										 Id = (UInt32Value)0U,
-										 Name = img.FileName
-									 },
-									 new PIC.NonVisualPictureDrawingProperties()),
-								 new PIC.BlipFill(
-									 new A.Blip(
-										 new A.BlipExtensionList(
-											 new A.BlipExtension()
-											 {
-												 Uri =
-													"{28A0092B-C50C-407E-A947-70E740481C1C}"
-											 })
-									 )
-									 {
-										 Embed = relationshipId,
-										 CompressionState =
-										 A.BlipCompressionValues.Print
-									 },
-									 new A.Stretch(
-										 new A.FillRectangle())),
-								 new PIC.ShapeProperties(
-									 new A.Transform2D(
-										 new A.Offset() { X = 0L, Y = 0L },
-										 new A.Extents()
-										 {
-											 Cx = img.GetWidthInEMU(),
-											 Cy = img.GetHeightInEMU()
-										 }),
-									 new A.PresetGeometry(
-										 new A.AdjustValueList()
-									 ) { Preset = A.ShapeTypeValues.Rectangle }))
-						 ) { Uri = "http://schemas.openxmlformats.org/drawingml/2006/picture" })
-				 )
-				 {
-					 DistanceFromTop = (UInt32Value)0U,
-					 DistanceFromBottom = (UInt32Value)0U,
-					 DistanceFromLeft = (UInt32Value)0U,
-					 DistanceFromRight = (UInt32Value)0U,
-					 //EditId = "50D07946"
-				 });
-
-		outDoc.MainDocumentPart.Document.Body.AppendChild(new Paragraph(new Run(element)));
-	}
-	#endregion
 	
 	#region 增加段落
 	/// <summary>
@@ -689,6 +606,91 @@ public class OpenXmlHelper {
 	}
 	#endregion
 
+	#region 插入圖片
+	/// <summary>
+	/// 插入圖片
+	/// </summary>
+	//public void AppendImage(string imgStr, bool isBase64, decimal scale) {
+	//	ImageData img= new ImageData(imgStr, isBase64, scale);
+	public void AppendImage(ImageFile img) {
+		ImagePart imagePart = outDoc.MainDocumentPart.AddImagePart(ImagePartType.Jpeg);
+		string relationshipId = outDoc.MainDocumentPart.GetIdOfPart(imagePart);
+		imagePart.FeedData(img.getDataStream());
+
+		// Define the reference of the image.
+		var element =
+			 new Drawing(
+				 new DW.Inline(
+					 //Size of image, unit = EMU(English Metric Unit)
+					 //1 cm = 360000 EMUs
+					 new DW.Extent() { Cx = img.GetWidthInEMU(), Cy = img.GetHeightInEMU() },
+					 new DW.EffectExtent()
+					 {
+						 LeftEdge = 0L,
+						 TopEdge = 0L,
+						 RightEdge = 0L,
+						 BottomEdge = 0L
+					 },
+					 new DW.DocProperties()
+					 {
+						 Id = (UInt32Value)1U,
+						 Name = img.ImageName
+					 },
+					 new DW.NonVisualGraphicFrameDrawingProperties(
+						 new A.GraphicFrameLocks() { NoChangeAspect = true }),
+					 new A.Graphic(
+						 new A.GraphicData(
+							 new PIC.Picture(
+								 new PIC.NonVisualPictureProperties(
+									 new PIC.NonVisualDrawingProperties()
+									 {
+										 Id = (UInt32Value)0U,
+										 Name = img.FileName
+									 },
+									 new PIC.NonVisualPictureDrawingProperties()),
+								 new PIC.BlipFill(
+									 new A.Blip(
+										 new A.BlipExtensionList(
+											 new A.BlipExtension()
+											 {
+												 Uri =
+													"{28A0092B-C50C-407E-A947-70E740481C1C}"
+											 })
+									 )
+									 {
+										 Embed = relationshipId,
+										 CompressionState =
+										 A.BlipCompressionValues.Print
+									 },
+									 new A.Stretch(
+										 new A.FillRectangle())),
+								 new PIC.ShapeProperties(
+									 new A.Transform2D(
+										 new A.Offset() { X = 0L, Y = 0L },
+										 new A.Extents()
+										 {
+											 Cx = img.GetWidthInEMU(),
+											 Cy = img.GetHeightInEMU()
+										 }),
+									 new A.PresetGeometry(
+										 new A.AdjustValueList()
+									 )
+									 { Preset = A.ShapeTypeValues.Rectangle }))
+						 )
+						 { Uri = "http://schemas.openxmlformats.org/drawingml/2006/picture" })
+				 )
+				 {
+					 DistanceFromTop = (UInt32Value)0U,
+					 DistanceFromBottom = (UInt32Value)0U,
+					 DistanceFromLeft = (UInt32Value)0U,
+					 DistanceFromRight = (UInt32Value)0U,
+					 //EditId = "50D07946"
+				 });
+
+		outDoc.MainDocumentPart.Document.Body.AppendChild(new Paragraph(new Run(element)));
+	}
+	#endregion
+
 }
 
 #region ImageFile
@@ -717,23 +719,23 @@ public class ImageFile {
 		}
 	}
 
-	public int SourceWidth;
-	public int SourceHeight;
+	//public int SourceWidth;
+	//public int SourceHeight;
 	public decimal Width;
 	public decimal Height;
 
 	//public long WidthInEMU => Convert.ToInt64(Width * CM_TO_EMU);
-	private long WidthInEMU = 0;
+	//private long WidthInEMU = 0;
 	public long GetWidthInEMU() {
-		WidthInEMU = Convert.ToInt64(Width * CM_TO_EMU);
-		return WidthInEMU;
+		//WidthInEMU = Convert.ToInt64(Width * CM_TO_EMU);
+		return Convert.ToInt64(Width * CM_TO_EMU);
 	}
 
 	//public long HeightInEMU => Convert.ToInt64(Height * CM_TO_EMU);
-	private long HeightInEMU = 0;
+	//private long HeightInEMU = 0;
 	public long GetHeightInEMU() {
-		HeightInEMU = Convert.ToInt64(Height * CM_TO_EMU);
-		return HeightInEMU;
+		//HeightInEMU = Convert.ToInt64(Height * CM_TO_EMU);
+		return Convert.ToInt64(Height * CM_TO_EMU);
 	}
 
 	private const decimal INCH_TO_CM = 2.54M;
@@ -750,10 +752,12 @@ public class ImageFile {
 		}
 
 		BinaryData = data;
-		int dpi = 300;
 		Bitmap img = new Bitmap(new MemoryStream(data));
-		SourceWidth = img.Width;
-		SourceHeight = img.Height;
+		int dpi = 300;
+		//int dpi = (int)(img.VerticalResolution < 300 ? 300 : img.VerticalResolution);
+		int SourceWidth = img.Width;
+		int SourceHeight = img.Height;
+		//throw new Exception(string.Format("w:{0},h:{1},dpi:{2}", SourceWidth, SourceHeight, dpi));
 		Width = ((decimal)SourceWidth) / dpi * scale * INCH_TO_CM;
 		Height = ((decimal)SourceHeight) / dpi * scale * INCH_TO_CM;
 	}
