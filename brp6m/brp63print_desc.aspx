@@ -17,7 +17,7 @@
 		Response.AddHeader("Pragma", "no-cache");
 		Response.Expires = -1;
 		Response.Clear();
-		
+
 		in_scode = (Request["in_scode"] ?? "n100").ToString();//n100
 		in_no = (Request["in_no"] ?? "20170103001").ToString();//20170103001
 		branch = (Request["branch"] ?? "N").ToString();//N
@@ -41,10 +41,12 @@
 		_TemplateFileList.Add("desc", Server.MapPath("~/ReportTemplate/說明書/01發明說明書IE_1.docx"));
 		ipoRpt.CloneFromFile(_TemplateFileList, false);
 
-		ipoRpt.ReplaceBookmark("cappl_name", "中文1");
-		ipoRpt.ReplaceBookmark("eappl_name", "英文1");
-		ipoRpt.ReplaceBookmark("cappl_name1", "英文2");
-		ipoRpt.ReplaceBookmark("eappl_name1", "英文2");
+		ipoRpt.ReplaceText("#cappl_name#", "專利中文名稱");
+		ipoRpt.ReplaceText("#eappl_name#", "專利英文名稱");
+		//ipoRpt.ReplaceBookmark("cappl_name", "中文1");
+		//ipoRpt.ReplaceBookmark("eappl_name", "英文1");
+		//ipoRpt.ReplaceBookmark("cappl_name1", "英文2");
+		//ipoRpt.ReplaceBookmark("eappl_name1", "英文2");
 
 		ipoRpt.Flush("[團體標章註冊申請書]-NT66824.docx");
 	}

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
-using System.Data.SqlClient;
 using System.Web;
 using System.IO;
 using DocumentFormat.OpenXml;
@@ -17,7 +16,6 @@ using System.Drawing;
 /// Docx 操作類別(use OpenXml SDK)
 /// TODO:
 /// 紙張邊界
-/// 表格操作
 /// </summary>
 public class OpenXmlHelper {
 	protected WordprocessingDocument outDoc = null;
@@ -220,7 +218,7 @@ public class OpenXmlHelper {
 	}
 	#endregion
 	
-	#region 複製範本Block,並取代文字
+	#region 複製範本Block,並取代文字後再貼上
 	/// <summary>
 	/// 複製範本Block,並取代文字
 	/// </summary>
@@ -265,6 +263,26 @@ public class OpenXmlHelper {
 		}
 		catch (Exception ex) {
 			throw new Exception("複製範本Block錯誤!!(" + blockName + "," + i + ")", ex);
+		}
+	}
+	#endregion
+
+	#region 取代文字
+	/// <summary>
+	/// 取代輸出檔文字
+	/// </summary>
+	public void ReplaceText(string searchStr, string newStr) {
+		List<Paragraph> pars = outBody.Descendants<Paragraph>().ToList();
+		for (int i = 0; i < pars.Count; i++) {
+			string tmpInnerText = pars[i].InnerText;
+			tmpInnerText = tmpInnerText.Replace(searchStr, newStr);
+			Run parRun = pars[i].Descendants<Run>().FirstOrDefault();
+			pars[i].RemoveAllChildren<Run>();
+			if (parRun != null) {
+				parRun.RemoveAllChildren<Text>();
+				parRun.Append(new Text(tmpInnerText));
+				pars[i].Append(parRun.CloneNode(true));
+			}
 		}
 	}
 	#endregion
