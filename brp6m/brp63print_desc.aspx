@@ -41,8 +41,11 @@
 		_TemplateFileList.Add("desc", Server.MapPath("~/ReportTemplate/說明書/01發明說明書IE_1.docx"));
 		ipoRpt.CloneFromFile(_TemplateFileList, false);
 
-		ipoRpt.ReplaceText("#cappl_name#", "專利中文名稱");
-		ipoRpt.ReplaceText("#eappl_name#", "專利英文名稱");
+
+		ipoRpt.AddText("【圖様】xxxxx").AddParagraph();
+		ipoRpt.AddText("【中文字義】xxxxx").AddParagraph();
+		//ipoRpt.ReplaceText("#cappl_name#", "專利中文名稱");
+		//ipoRpt.ReplaceText("#eappl_name#", "專利英文名稱");
 		//ipoRpt.ReplaceBookmark("cappl_name", "中文1");
 		//ipoRpt.ReplaceBookmark("eappl_name", "英文1");
 		//ipoRpt.ReplaceBookmark("cappl_name1", "英文2");

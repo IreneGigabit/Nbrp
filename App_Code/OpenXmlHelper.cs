@@ -217,29 +217,29 @@ public class OpenXmlHelper {
 		}
 	}
 	#endregion
-	
+
 	#region 複製範本Block,並取代文字後再貼上
 	/// <summary>
-	/// 複製範本Block,並取代文字
+	/// 複製範本Block,並取代文字後再貼上
 	/// </summary>
 	public void CopyReplaceBlock(string blockName, string searchStr, string newStr) {
 		CopyReplaceBlock(blockName, new Dictionary<string, string>() { { searchStr, newStr } });
 	}
 	/// <summary>
-	/// 複製範本Block,並取代文字(指定來源)
+	/// 複製範本Block,並取代文字後再貼上(指定來源)
 	/// </summary>
 	/// <param name="srcDocName">來源範本別名</param>
 	public void CopyReplaceBlock(string srcDocName, string blockName, string searchStr, string newStr) {
 		CopyReplaceBlock(srcDocName, blockName, new Dictionary<string, string>() { { searchStr, newStr } });
 	}
 	/// <summary>
-	/// 複製範本Block,並取代文字
+	/// 複製範本Block,並取代文字後再貼上
 	/// </summary>
 	public void CopyReplaceBlock(string blockName, Dictionary<string, string> mappingDic) {
 		CopyReplaceBlock(defTplDocName, blockName, mappingDic);
 	}
 	/// <summary>
-	/// 複製範本Block,並取代文字(指定來源)
+	/// 複製範本Block,並取代文字後再貼上(指定來源)
 	/// </summary>
 	/// <param name="srcDocName">來源範本別名</param>
 	public void CopyReplaceBlock(string srcDocName, string blockName, Dictionary<string, string> mappingDic) {
@@ -293,67 +293,60 @@ public class OpenXmlHelper {
 	/// </summary>
 	/// <param name="bookmarkName">書籤名稱</param>
 	public void ReplaceBookmark(string bookmarkName, string text) {
+		ReplaceBookmark(bookmarkName, text, false);
+	}
+	/// <summary>
+	/// 取代書籤
+	/// </summary>
+	/// <param name="bookmarkName">書籤名稱</param>
+	/// <param name="delFlag">若取代值為空,是否刪除整個段落</param>
+	public void ReplaceBookmark(string bookmarkName, string text, bool delFlag) {
 		try {
 			MainDocumentPart mainPart = outDoc.MainDocumentPart;
 			//IEnumerable<BookmarkEnd> bookMarkEnds = mainPart.RootElement.Descendants<BookmarkEnd>();
 			foreach (BookmarkStart bookmarkStart in mainPart.RootElement.Descendants<BookmarkStart>()) {
 				if (bookmarkStart.Name.Value.ToLower() == bookmarkName.ToLower()) {
 					string id = bookmarkStart.Id.Value;
-					//BookmarkEnd bookmarkEnd = bookMarkEnds.Where(i => i.Id.Value == id).FirstOrDefault();
-					BookmarkEnd bookmarkEnd = bookmarkStart.Parent.Descendants<BookmarkEnd>().Where(i => i.Id.Value == id).FirstOrDefault();
+					
+					//如果是空值,且要刪除整個段落
+					if (text.Trim() == "" && delFlag) {
+						bookmarkStart.Parent.Remove();
+					} else {
+						//BookmarkEnd bookmarkEnd = bookMarkEnds.Where(i => i.Id.Value == id).FirstOrDefault();
+						BookmarkEnd bookmarkEnd = bookmarkStart.Parent.Descendants<BookmarkEnd>().Where(i => i.Id.Value == id).FirstOrDefault();
 
-					////留第一個run其他run刪除
-					//Run bookmarkRun = bookmarkStart.NextSibling<Run>();
-					//if (bookmarkRun != null) {
-					//	Run tplRun = bookmarkRun;
-					//	string[] txtArr = text.Split('\n');
-					//	for (int i = 0; i < txtArr.Length; i++) {
-					//		if (i == 0) {
-					//			bookmarkRun.GetFirstChild<Text>().Text = txtArr[i];
-					//		} else {
-					//			bookmarkRun.Append(new Break());
-					//			bookmarkRun.Append(new Text(txtArr[i]));
-					//		}
-					//	}
-					//	int j = 0;
-					//	while (tplRun.NextSibling() != null && tplRun.NextSibling().GetType() != typeof(BookmarkEnd)) {
-					//		j++;
-					//		tplRun.NextSibling().Remove();
-					//		if (j >= 20)
-					//			break;
-					//	}
-					//}
-					//留第一個run其他run刪除,刪到BookmarkEnd為止
-					OpenXmlElement[] bookmarkItems = bookmarkStart.Parent.ChildElements.ToArray();
-					bool canRemove = false;
-					int bIndex = 0;
-					foreach (OpenXmlElement item in bookmarkItems) {
-						if (item.GetType() == typeof(BookmarkEnd)) {
-							break;
-						} 
-						if (canRemove && item.GetType() == typeof(Run)) {
-							if (bIndex == 0) {
-								string[] txtArr = text.Split('\n');
-								for (int i = 0; i < txtArr.Length; i++) {
-									if (i == 0) {
-										item.GetFirstChild<Text>().Text = txtArr[i];
-									} else {
-										item.Append(new Break());
-										item.Append(new Text(txtArr[i]));
-									}
-								}
-							} else {
-							item.Remove();
+						//留第一個run其他run刪除,刪到BookmarkEnd為止
+						OpenXmlElement[] bookmarkItems = bookmarkStart.Parent.ChildElements.ToArray();
+						bool canRemove = false;
+						int bIndex = 0;
+						foreach (OpenXmlElement item in bookmarkItems) {
+							if (item.GetType() == typeof(BookmarkEnd)) {
+								break;
 							}
-							bIndex++;
+							if (canRemove && item.GetType() == typeof(Run)) {
+								if (bIndex == 0) {
+									string[] txtArr = text.Split('\n');
+									for (int i = 0; i < txtArr.Length; i++) {
+										if (i == 0) {
+											item.GetFirstChild<Text>().Text = txtArr[i];
+										} else {
+											item.Append(new Break());
+											item.Append(new Text(txtArr[i]));
+										}
+									}
+								} else {
+									item.Remove();
+								}
+								bIndex++;
+							}
+							if (item.GetType() == typeof(BookmarkStart)) {
+								canRemove = true;
+							}
 						}
-						if (item.GetType() == typeof(BookmarkStart)) {
-							canRemove = true;
-						}
-					}
 
-					bookmarkStart.Remove();
-					if (bookmarkEnd != null) bookmarkEnd.Remove();
+						bookmarkStart.Remove();
+						if (bookmarkEnd != null) bookmarkEnd.Remove();
+					}
 				}
 			}
 		}
@@ -418,9 +411,10 @@ public class OpenXmlHelper {
 	/// <summary>
 	/// 增加段落
 	/// </summary>
-	public void AddParagraph(Paragraph par) {
+	public OpenXmlHelper AddParagraph(Paragraph par) {
 		//outDoc.MainDocumentPart.Document.Body.Append(par.CloneNode(true));
 		outBody.Append(par.CloneNode(true));
+		return this;
 	}
 	#endregion
 
@@ -429,7 +423,16 @@ public class OpenXmlHelper {
 	/// 增加段落
 	/// </summary>
 	public OpenXmlHelper AddParagraph() {
-		outBody.Append(new Paragraph(new Run()));
+		Paragraph NewPar = new Paragraph();
+		ParagraphProperties LastParPro = outDoc.MainDocumentPart.RootElement.Descendants<ParagraphProperties>().LastOrDefault();
+		NewPar.Append(LastParPro.CloneNode(true));
+
+		Run LastRun = new Run();
+		RunProperties LastRunProperties = outDoc.MainDocumentPart.RootElement.Descendants<RunProperties>().LastOrDefault();
+		LastRun.Append(LastRunProperties.CloneNode(true));
+		NewPar.Append(LastRun);
+		outBody.Append(NewPar);
+		//outBody.Append(new Paragraph(new Run()));
 		return this;
 	}
 	#endregion
@@ -439,10 +442,15 @@ public class OpenXmlHelper {
 	/// 在文件最後的段落加上文字
 	/// </summary>
 	public OpenXmlHelper AddText(string text) {
-		Run LastRun = outDoc.MainDocumentPart.RootElement.Descendants<Run>().LastOrDefault();
+		Paragraph LastPar = outDoc.MainDocumentPart.RootElement.Descendants<Paragraph>().LastOrDefault();
+		Run LastRun = LastPar.Descendants<Run>().LastOrDefault();
 		if (LastRun == null) {
-			outBody.AppendChild(new Paragraph(new Run()));
-			LastRun = outDoc.MainDocumentPart.RootElement.Descendants<Run>().LastOrDefault();
+			LastRun = new Run();
+			RunProperties LastRunProperties= outDoc.MainDocumentPart.RootElement.Descendants<RunProperties>().LastOrDefault();
+			LastRun.Append(LastRunProperties.CloneNode(true));
+			LastPar.Append(LastRun);
+			//LastPar.AppendChild(new Run());
+			//LastRun = outDoc.MainDocumentPart.RootElement.Descendants<Run>().LastOrDefault();
 		}
 
 		string[] txtArr = text.Split('\n');
