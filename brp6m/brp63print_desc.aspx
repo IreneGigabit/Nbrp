@@ -17,7 +17,7 @@
 		Response.AddHeader("Pragma", "no-cache");
 		Response.Expires = -1;
 		Response.Clear();
-
+		
 		in_scode = (Request["in_scode"] ?? "n100").ToString();//n100
 		in_no = (Request["in_no"] ?? "20170103001").ToString();//20170103001
 		branch = (Request["branch"] ?? "N").ToString();//N
@@ -40,17 +40,24 @@
 		//_TemplateFileList.Add("base", Server.MapPath("~/ReportTemplate/00基本資料表.docx"));
 		_TemplateFileList.Add("desc", Server.MapPath("~/ReportTemplate/說明書/01發明說明書IE_1.docx"));
 		ipoRpt.CloneFromFile(_TemplateFileList, false);
+		//ipoRpt.CloneFromFile(_TemplateFileList, true);
 
+		ipoRpt.AddText("【商標圖樣分析】").AddParagraph();
+		ipoRpt.AddText("　　【中文】　　　　　　　　　").AddParagraph();
+		ipoRpt.AddText("　　【外文】").AddParagraph();
+		ipoRpt.AddText("　　　【語文別】　　　　　　　").AddParagraph();
+		ipoRpt.AddText("　　　【內容】　　　　　　　　").AddParagraph();
+		ipoRpt.AddText("　　　【中文字義】　　　　　　").AddParagraph();
+		ipoRpt.AddText("　　【圖形】　　　　　　　　　").AddParagraph();
+		ipoRpt.AddText("　　【記號】　　　　　　　　　").AddParagraph();
 
-		ipoRpt.AddText("【圖様】xxxxx").AddParagraph();
-		ipoRpt.AddText("【中文字義】xxxxx").AddParagraph();
 		//ipoRpt.ReplaceText("#cappl_name#", "專利中文名稱");
 		//ipoRpt.ReplaceText("#eappl_name#", "專利英文名稱");
 		//ipoRpt.ReplaceBookmark("cappl_name", "中文1");
 		//ipoRpt.ReplaceBookmark("eappl_name", "英文1");
 		//ipoRpt.ReplaceBookmark("cappl_name1", "英文2");
 		//ipoRpt.ReplaceBookmark("eappl_name1", "英文2");
-
+		
 		ipoRpt.Flush("[團體標章註冊申請書]-NT66824.docx");
 	}
 </script>

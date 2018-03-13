@@ -309,7 +309,7 @@ public class OpenXmlHelper {
 					string id = bookmarkStart.Id.Value;
 					
 					//如果是空值,且要刪除整個段落
-					if (text.Trim() == "" && delFlag) {
+					if (text == "" && delFlag) {
 						bookmarkStart.Parent.Remove();
 					} else {
 						//BookmarkEnd bookmarkEnd = bookMarkEnds.Where(i => i.Id.Value == id).FirstOrDefault();
@@ -424,12 +424,16 @@ public class OpenXmlHelper {
 	/// </summary>
 	public OpenXmlHelper AddParagraph() {
 		Paragraph NewPar = new Paragraph();
-		ParagraphProperties LastParPro = outDoc.MainDocumentPart.RootElement.Descendants<ParagraphProperties>().LastOrDefault();
-		NewPar.Append(LastParPro.CloneNode(true));
+		ParagraphProperties LastParProp = outDoc.MainDocumentPart.RootElement.Descendants<ParagraphProperties>().LastOrDefault();
+		if (LastParProp != null) {
+			NewPar.Append(LastParProp.CloneNode(true));
+		}
 
 		Run LastRun = new Run();
-		RunProperties LastRunProperties = outDoc.MainDocumentPart.RootElement.Descendants<RunProperties>().LastOrDefault();
-		LastRun.Append(LastRunProperties.CloneNode(true));
+		RunProperties LastRunProp = outDoc.MainDocumentPart.RootElement.Descendants<RunProperties>().LastOrDefault();
+		if (LastRunProp != null) {
+			LastRun.Append(LastRunProp.CloneNode(true));
+		}
 		NewPar.Append(LastRun);
 		outBody.Append(NewPar);
 		//outBody.Append(new Paragraph(new Run()));
@@ -443,11 +447,17 @@ public class OpenXmlHelper {
 	/// </summary>
 	public OpenXmlHelper AddText(string text) {
 		Paragraph LastPar = outDoc.MainDocumentPart.RootElement.Descendants<Paragraph>().LastOrDefault();
+		if (LastPar == null) {
+			LastPar = new Paragraph();
+		}
+
 		Run LastRun = LastPar.Descendants<Run>().LastOrDefault();
 		if (LastRun == null) {
 			LastRun = new Run();
-			RunProperties LastRunProperties= outDoc.MainDocumentPart.RootElement.Descendants<RunProperties>().LastOrDefault();
-			LastRun.Append(LastRunProperties.CloneNode(true));
+			RunProperties LastRunProp= outDoc.MainDocumentPart.RootElement.Descendants<RunProperties>().LastOrDefault();
+			if (LastRunProp != null) {
+				LastRun.Append(LastRunProp.CloneNode(true));
+			}
 			LastPar.Append(LastRun);
 			//LastPar.AppendChild(new Run());
 			//LastRun = outDoc.MainDocumentPart.RootElement.Descendants<Run>().LastOrDefault();
