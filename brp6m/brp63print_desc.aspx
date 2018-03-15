@@ -42,7 +42,7 @@
 		ipoRpt.CloneFromFile(_TemplateFileList, false);
 		//ipoRpt.CloneFromFile(_TemplateFileList, true);
 
-		ipoRpt.AddText("【商標圖樣分析】").AddParagraph();
+		ipoRpt.AddText("【商標圖樣分析】\nxxxxxx").AddParagraph();
 		ipoRpt.AddText("　　【中文】　　　　　　　　　").AddParagraph();
 		ipoRpt.AddText("　　【外文】").AddParagraph();
 		ipoRpt.AddText("　　　【語文別】　　　　　　　").AddParagraph();

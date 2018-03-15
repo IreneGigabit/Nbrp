@@ -10,7 +10,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using A = DocumentFormat.OpenXml.Drawing;
 using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
 using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
-using System.Drawing;
+//using System.Drawing;
 
 /// <summary>
 /// Docx 操作類別(use OpenXml SDK)
@@ -788,7 +788,7 @@ public class ImageFile {
 		}
 
 		BinaryData = data;
-		Bitmap img = new Bitmap(new MemoryStream(data));
+		System.Drawing.Bitmap img = new System.Drawing.Bitmap(new MemoryStream(data));
 		int dpi = 300;
 		//int dpi = (int)(img.VerticalResolution < 300 ? 300 : img.VerticalResolution);
 		int SourceWidth = img.Width;
