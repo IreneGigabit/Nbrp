@@ -246,17 +246,20 @@ public class OpenXmlHelper {
 		int i = 0;
 		try {
 			List<OpenXmlElement> pars = CopyBlockList(srcDocName, blockName);
-			for (i=0; i < pars.Count; i++) {
+			for (i = 0; i < pars.Count; i++) {
+				string oldInnerText = pars[i].InnerText;
 				string tmpInnerText = pars[i].InnerText;
 				foreach (var item in mappingDic) {
 					tmpInnerText = tmpInnerText.Replace(item.Key, item.Value);
 				}
-				Run parRun = pars[i].Descendants<Run>().FirstOrDefault();
-				pars[i].RemoveAllChildren<Run>();
-				if (parRun != null) {
-					parRun.RemoveAllChildren<Text>();
-					parRun.Append(new Text(tmpInnerText));
-					pars[i].Append(parRun.CloneNode(true));
+				if (oldInnerText != tmpInnerText) {
+					Run parRun = pars[i].Descendants<Run>().FirstOrDefault();
+					pars[i].RemoveAllChildren<Run>();
+					if (parRun != null) {
+						parRun.RemoveAllChildren<Text>();
+						parRun.Append(new Text(tmpInnerText));
+						pars[i].Append(parRun.CloneNode(true));
+					}
 				}
 			}
 			outBody.Append(pars.ToArray());
@@ -275,13 +278,15 @@ public class OpenXmlHelper {
 		List<Paragraph> pars = outBody.Descendants<Paragraph>().ToList();
 		for (int i = 0; i < pars.Count; i++) {
 			string tmpInnerText = pars[i].InnerText;
-			tmpInnerText = tmpInnerText.Replace(searchStr, newStr);
-			Run parRun = pars[i].Descendants<Run>().FirstOrDefault();
-			pars[i].RemoveAllChildren<Run>();
-			if (parRun != null) {
-				parRun.RemoveAllChildren<Text>();
-				parRun.Append(new Text(tmpInnerText));
-				pars[i].Append(parRun.CloneNode(true));
+			if (tmpInnerText.IndexOf(searchStr) > -1) {
+				tmpInnerText = tmpInnerText.Replace(searchStr, newStr);
+				Run parRun = pars[i].Descendants<Run>().FirstOrDefault();
+				pars[i].RemoveAllChildren<Run>();
+				if (parRun != null) {
+					parRun.RemoveAllChildren<Text>();
+					parRun.Append(new Text(tmpInnerText));
+					pars[i].Append(parRun.CloneNode(true));
+				}
 			}
 		}
 	}
@@ -292,6 +297,17 @@ public class OpenXmlHelper {
 	/// 取代書籤
 	/// </summary>
 	/// <param name="bookmarkName">書籤名稱</param>
+	/// <param name="text">取代的值</param>
+	/// <param name="ptext">若取代的值為空,則用此字串代替</param>
+	public void ReplaceBookmark(string bookmarkName, string text, string ptext) {
+		if (text == "")
+			ReplaceBookmark(bookmarkName, ptext, false);
+	}
+	/// <summary>
+	/// 取代書籤
+	/// </summary>
+	/// <param name="bookmarkName">書籤名稱</param>
+	/// <param name="text">取代的值</param>
 	public void ReplaceBookmark(string bookmarkName, string text) {
 		ReplaceBookmark(bookmarkName, text, false);
 	}
@@ -299,6 +315,7 @@ public class OpenXmlHelper {
 	/// 取代書籤
 	/// </summary>
 	/// <param name="bookmarkName">書籤名稱</param>
+	/// <param name="text">取代的值</param>
 	/// <param name="delFlag">若取代值為空,是否刪除整個段落</param>
 	public void ReplaceBookmark(string bookmarkName, string text, bool delFlag) {
 		try {
