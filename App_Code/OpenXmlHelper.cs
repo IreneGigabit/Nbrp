@@ -301,7 +301,17 @@ public class OpenXmlHelper {
 	/// <param name="ptext">若取代的值為空,則用此字串代替</param>
 	public void ReplaceBookmark(string bookmarkName, string text, string ptext) {
 		if (text == "")
-			ReplaceBookmark(bookmarkName, ptext, false);
+			ReplaceBookmark(bookmarkName, ptext, false, System.Drawing.Color.Empty);
+	}
+	/// <summary>
+	/// 取代書籤
+	/// </summary>
+	/// <param name="bookmarkName">書籤名稱</param>
+	/// <param name="text">取代的值</param>
+	/// <param name="ptext">若取代的值為空,則用此字串代替</param>
+	public void ReplaceBookmark(string bookmarkName, string text, string ptext, System.Drawing.Color color) {
+		if (text == "")
+			ReplaceBookmark(bookmarkName, ptext, false, color);
 	}
 	/// <summary>
 	/// 取代書籤
@@ -309,8 +319,17 @@ public class OpenXmlHelper {
 	/// <param name="bookmarkName">書籤名稱</param>
 	/// <param name="text">取代的值</param>
 	public void ReplaceBookmark(string bookmarkName, string text) {
-		ReplaceBookmark(bookmarkName, text, false);
+		ReplaceBookmark(bookmarkName, text, false, System.Drawing.Color.Empty);
 	}
+	/// <summary>
+	/// 取代書籤
+	/// </summary>
+	/// <param name="bookmarkName">書籤名稱</param>
+	/// <param name="text">取代的值</param>
+	public void ReplaceBookmark(string bookmarkName, string text, System.Drawing.Color color) {
+		ReplaceBookmark(bookmarkName, text, false, color);
+	}
+
 	/// <summary>
 	/// 取代書籤
 	/// </summary>
@@ -318,13 +337,22 @@ public class OpenXmlHelper {
 	/// <param name="text">取代的值</param>
 	/// <param name="delFlag">若取代值為空,是否刪除整個段落</param>
 	public void ReplaceBookmark(string bookmarkName, string text, bool delFlag) {
+		ReplaceBookmark(bookmarkName, text, false, System.Drawing.Color.Empty);
+	}
+	/// <summary>
+	/// 取代書籤
+	/// </summary>
+	/// <param name="bookmarkName">書籤名稱</param>
+	/// <param name="text">取代的值</param>
+	/// <param name="delFlag">若取代值為空,是否刪除整個段落</param>
+	public void ReplaceBookmark(string bookmarkName, string text, bool delFlag, System.Drawing.Color color) {
 		try {
 			MainDocumentPart mainPart = outDoc.MainDocumentPart;
 			//IEnumerable<BookmarkEnd> bookMarkEnds = mainPart.RootElement.Descendants<BookmarkEnd>();
 			foreach (BookmarkStart bookmarkStart in mainPart.RootElement.Descendants<BookmarkStart>()) {
 				if (bookmarkStart.Name.Value.ToLower() == bookmarkName.ToLower()) {
 					string id = bookmarkStart.Id.Value;
-					
+
 					//如果是空值,且要刪除整個段落
 					if (text == "" && delFlag) {
 						bookmarkStart.Parent.Remove();
@@ -345,6 +373,14 @@ public class OpenXmlHelper {
 									string[] txtArr = text.Split('\n');
 									for (int i = 0; i < txtArr.Length; i++) {
 										if (i == 0) {
+											if (color != System.Drawing.Color.Empty) {
+												RunProperties FirstRunProp = item.Descendants<RunProperties>().FirstOrDefault();
+												if (FirstRunProp == null) {
+													FirstRunProp = new RunProperties();
+												}
+												Color RunColor = new Color() { Val = toHtmlHexColor(color) };
+												FirstRunProp.Append(RunColor);
+											}
 											item.GetFirstChild<Text>().Text = txtArr[i];
 										} else {
 											item.Append(new Break());
@@ -463,23 +499,27 @@ public class OpenXmlHelper {
 	/// 在文件最後的段落加上文字
 	/// </summary>
 	public OpenXmlHelper AddText(string text) {
+		return AddText(text, System.Drawing.Color.Empty);
+	}
+	/// <summary>
+	/// 在文件最後的段落加上文字
+	/// </summary>
+	public OpenXmlHelper AddText(string text, System.Drawing.Color color) {
 		Paragraph LastPar = outDoc.MainDocumentPart.RootElement.Descendants<Paragraph>().LastOrDefault();
 		if (LastPar == null) {
 			LastPar = new Paragraph();
 		}
 
-		Run LastRun = LastPar.Descendants<Run>().LastOrDefault();
-		if (LastRun == null) {
-			LastRun = new Run();
-			RunProperties LastRunProp= outDoc.MainDocumentPart.RootElement.Descendants<RunProperties>().LastOrDefault();
-			if (LastRunProp != null) {
-				LastRun.Append(LastRunProp.CloneNode(true));
-			}
-			LastPar.Append(LastRun);
-			//LastPar.AppendChild(new Run());
-			//LastRun = outDoc.MainDocumentPart.RootElement.Descendants<Run>().LastOrDefault();
+		RunProperties LastRunProp = (RunProperties)outDoc.MainDocumentPart.RootElement.Descendants<RunProperties>().LastOrDefault().CloneNode(true);
+		if (LastRunProp == null) {
+			LastRunProp = new RunProperties();
 		}
-
+		Run LastRun = new Run();
+		if (color != System.Drawing.Color.Empty) {
+			Color RunColor = new Color() { Val = toHtmlHexColor(color) };
+			LastRunProp.Append(RunColor);
+			LastRun.Append(LastRunProp.CloneNode(true));
+		}
 		string[] txtArr = text.Split('\n');
 		for (int i = 0; i < txtArr.Length; i++) {
 			if (i != 0) {
@@ -487,6 +527,8 @@ public class OpenXmlHelper {
 			}
 			LastRun.Append(new Text(txtArr[i]));
 		}
+		LastPar.Append(LastRun);
+
 		return this;
 	}
 	#endregion
@@ -658,6 +700,10 @@ public class OpenXmlHelper {
 		}
 	}
 	#endregion
+
+	public static string toHtmlHexColor(System.Drawing.Color color) {
+		return String.Format("#{0:X2}{1:X2}{2:X2}", color.R, color.G, color.B);
+	}
 
 	#region 插入圖片
 	/// <summary>

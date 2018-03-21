@@ -4,6 +4,7 @@
 <%@ Import Namespace = "System.IO"%>
 <%@ Import Namespace = "System.Linq"%>
 <%@ Import Namespace = "System.Collections.Generic"%>
+<%@ Import Namespace = "System.Drawing"%>
 
 <script runat="server">
 	protected string in_scode = "";
@@ -57,7 +58,7 @@
 		ipoRpt.AppendImage(new ImageFile(Server.MapPath("~/ReportTemplate") + @"\75081_0.jpg"));//插入實體檔案
 		ipoRpt.AppendImage(new ImageFile(Server.MapPath("~/ReportTemplate") + @"\家禾流通.jpg"));//插入實體檔案
 		ipoRpt.CopyBlock("b_apcust");//申請人
-		ipoRpt.ReplaceBookmark("apcust_country", "TW中華民國");
+		ipoRpt.ReplaceBookmark("apcust_country", "TW中華民國", Color.Red);
 		ipoRpt.ReplaceBookmark("apcust_cname", "英業達股份有限公司");
 		ipoRpt.ReplaceBookmark("apcust_ename", "INVENTEC CORPORATION");
 		ipoRpt.CopyBlock("b_agent");//代理人
@@ -70,10 +71,13 @@
 		ipoRpt.ReplaceBookmark("rectitle_name", "英業達股份有限公司");
 		ipoRpt.CopyBlock("b_attach");//附送書件
 		ipoRpt.CopyBlock("b_statement");//聲明內容
-										//ipoRpt.CopyBlock("b_table");
-		ipoRpt.CopyTable("b_table");
+		//ipoRpt.CopyBlock("b_table");
+		//ipoRpt.CopyTable("b_table");
 		ipoRpt.AddTableRow();
 		ipoRpt.PastTable();
+
+		ipoRpt.AddParagraph();
+		ipoRpt.AddText("112323").AddText("紅紅紅", Color.Red).AddText("99999");
 
 		ipoRpt.CopyPageFoot("apply",true);//頁尾+換頁
 
