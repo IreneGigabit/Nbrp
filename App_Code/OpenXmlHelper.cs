@@ -302,6 +302,8 @@ public class OpenXmlHelper {
 	public void ReplaceBookmark(string bookmarkName, string text, string ptext) {
 		if (text == "")
 			ReplaceBookmark(bookmarkName, ptext, false, System.Drawing.Color.Empty);
+		else
+			ReplaceBookmark(bookmarkName, text, false);
 	}
 	/// <summary>
 	/// 取代書籤
@@ -309,9 +311,12 @@ public class OpenXmlHelper {
 	/// <param name="bookmarkName">書籤名稱</param>
 	/// <param name="text">取代的值</param>
 	/// <param name="ptext">若取代的值為空,則用此字串代替</param>
+	/// <param name="color">若取代的值為空,套用此顏色</param>
 	public void ReplaceBookmark(string bookmarkName, string text, string ptext, System.Drawing.Color color) {
 		if (text == "")
 			ReplaceBookmark(bookmarkName, ptext, false, color);
+		else
+			ReplaceBookmark(bookmarkName, text, false);
 	}
 	/// <summary>
 	/// 取代書籤
@@ -326,6 +331,7 @@ public class OpenXmlHelper {
 	/// </summary>
 	/// <param name="bookmarkName">書籤名稱</param>
 	/// <param name="text">取代的值</param>
+	/// <param name="color">套用此顏色</param>
 	public void ReplaceBookmark(string bookmarkName, string text, System.Drawing.Color color) {
 		ReplaceBookmark(bookmarkName, text, false, color);
 	}
@@ -345,6 +351,7 @@ public class OpenXmlHelper {
 	/// <param name="bookmarkName">書籤名稱</param>
 	/// <param name="text">取代的值</param>
 	/// <param name="delFlag">若取代值為空,是否刪除整個段落</param>
+	/// <param name="color">套用此顏色</param>
 	public void ReplaceBookmark(string bookmarkName, string text, bool delFlag, System.Drawing.Color color) {
 		try {
 			MainDocumentPart mainPart = outDoc.MainDocumentPart;
@@ -701,9 +708,14 @@ public class OpenXmlHelper {
 	}
 	#endregion
 
+	#region 轉換顏色
+	/// <summary>
+	/// Color轉換成html色碼
+	/// </summary>
 	public static string toHtmlHexColor(System.Drawing.Color color) {
 		return String.Format("#{0:X2}{1:X2}{2:X2}", color.R, color.G, color.B);
 	}
+	#endregion
 
 	#region 插入圖片
 	/// <summary>
