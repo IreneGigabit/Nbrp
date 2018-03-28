@@ -343,7 +343,7 @@ public class OpenXmlHelper {
 	/// <param name="text">取代的值</param>
 	/// <param name="delFlag">若取代值為空,是否刪除整個段落</param>
 	public void ReplaceBookmark(string bookmarkName, string text, bool delFlag) {
-		ReplaceBookmark(bookmarkName, text, false, System.Drawing.Color.Empty);
+		ReplaceBookmark(bookmarkName, text, delFlag, System.Drawing.Color.Empty);
 	}
 	/// <summary>
 	/// 取代書籤
@@ -367,7 +367,7 @@ public class OpenXmlHelper {
 						//BookmarkEnd bookmarkEnd = bookMarkEnds.Where(i => i.Id.Value == id).FirstOrDefault();
 						BookmarkEnd bookmarkEnd = bookmarkStart.Parent.Descendants<BookmarkEnd>().Where(i => i.Id.Value == id).FirstOrDefault();
 
-						//留第一個run其他run刪除,刪到BookmarkEnd為止
+						//留第一個run其他run刪除,從BookmarkStart刪到BookmarkEnd為止
 						OpenXmlElement[] bookmarkItems = bookmarkStart.Parent.ChildElements.ToArray();
 						bool canRemove = false;
 						int bIndex = 0;
