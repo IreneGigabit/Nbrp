@@ -3,18 +3,16 @@
 <%@Import Namespace = "System.Data.SqlClient"%>
 
 <script runat="server">
-	void Application_Start(object sender, EventArgs e) {
-		// 啟動背景工作
-		BackgroundWork work = new BackgroundWork();
-		work.StartWork();
 
-		// 應用程式啟動時執行的程式碼
-		//Application["CasePath"] = "\\\\web08\\Data$\\document\\XAccount";
-		Application["CasePath"] = Server.MapPath("~/upload");
-		Application["uploadDir"] = "nacc";
-		Application["uploadPath"] = Server.MapPath("~/upload");
+    void Application_Start(object sender, EventArgs e) 
+    {
+        // 應用程式啟動時執行的程式碼
+        //Application["CasePath"] = "\\\\web08\\Data$\\document\\XAccount";
+        Application["CasePath"] = Server.MapPath("~/upload");
+        Application["uploadDir"] = "nacc";
+        Application["uploadPath"] = Server.MapPath("~/upload");
 		Application["rootPath"] = "http://localhost/NACC";
-		Application["photoPath"] = "D:\\Data\\Document\\NACC\\Temp\\images";
+        Application["photoPath"] = "D:\\Data\\Document\\NACC\\Temp\\images";
 		Application["MailServer"] = "localhost";
 		Application["MailAddr"] = "front.desk@my-farm.com.tw";
 		Application["CRSmail"] = "customer.service@my-farm.com.tw";
@@ -33,7 +31,7 @@
 		//Application["CalendarID"] = "primary";
 		Application["CalendarID"] = "u0khi7hf8pd2skn7rosg42973k@group.calendar.google.com";
 		Application["CldrStop"] = "GO";
-
+		
 		//Application["P12File"] = Server.MapPath("~/inc") + "\\MyFarmCalendar-e1c3efaf13e9.p12";
 		//Application["svrEmail"] = "myfarm-52@myfarmcalendar.iam.gserviceaccount.com";
 		//Application["usrEmail"] = "front.desk@my-farm.com.tw";
@@ -53,30 +51,21 @@
 		//}
 		//cnn.Close();
 	}
+    
+    void Application_End(object sender, EventArgs e) {
+        //  應用程式關閉時執行的程式碼
 
-	void Application_End(object sender, EventArgs e) {
-		//  應用程式關閉時執行的程式碼
-
-	}
-
-	void Application_Error(object sender, EventArgs e)  {
-		// 發生未處理錯誤時執行的程式碼
+    }
+        
+    void Application_Error(object sender, EventArgs e)  { 
+        // 發生未處理錯誤時執行的程式碼
 		//Exception ex = Server.GetLastError();
 		//server_code.exceptionLog(ex);//寫入LOG
 	}
 
-	void Session_Start(object sender, EventArgs e) {
-		// 啟動新工作階段時執行的程式碼
-		Session["ODBCDSN"] = System.Configuration.ConfigurationManager.ConnectionStrings["SQLcnnstring"].ToString();
-		Session["NACC"] = System.Configuration.ConfigurationManager.ConnectionStrings["SQLcnnstring"].ToString();
-		Session["ACCOUNT"] = System.Configuration.ConfigurationManager.ConnectionStrings["SQLAccount"].ToString();
-		Session["MACCOUNT"] = System.Configuration.ConfigurationManager.ConnectionStrings["SQLMAccount"].ToString();
-		Session["CUST"] = System.Configuration.ConfigurationManager.ConnectionStrings["SQLCust"].ToString();
-		Session["SysCtrl"] = System.Configuration.ConfigurationManager.ConnectionStrings["SQLcnnstring1"].ToString();
-		Session["BranchOLDB"] = System.Configuration.ConfigurationManager.ConnectionStrings["ODBCBranchCnnstringTest"].ToString();
-		Session["HeadOLDB"] = System.Configuration.ConfigurationManager.ConnectionStrings["ODBCHeadCnnstringTest"].ToString();
-		Session["imarraccount"] = System.Configuration.ConfigurationManager.ConnectionStrings["maccount"].ToString();//智產會計系統
-																													 //案件系統
+    void Session_Start(object sender, EventArgs e) {
+        // 啟動新工作階段時執行的程式碼
+		//案件系統
 		switch (Request.ServerVariables["HTTP_HOST"].ToString().ToUpper())
 		{
 			case "WEB10":
@@ -99,37 +88,33 @@
 				break;
 		}
 
-		Session["debit"] = "";//抓資料使用
-		Session["Password"] = false;
-		Session["UserID"] = Session.SessionID.ToString();
+        Session["Password"] = false;
+        Session["UserID"] = Session.SessionID.ToString();
 		Session["UserName"] = "";
 		Session["UserGrp"] = "";
-		Session["fSQL"] = "";
+        Session["fSQL"] = "";
 		Session["CaptchaImageText"] = "";
 		Session["ExtMsg"] = "";
 		Session["CustPasswd"] = false;
 		Session["SCodeID"] = "";
 		Session["CustID"] = "";
 		Session["CustName"] = "";
-		Session["CustEmail"] = "";
+		Session["CustEmail"] = "";        
 		Session["Loc"] = "";
 		Session["SvrName"] = "SIF02";
 		Session["SvrName1"] = "SIF02";
 		Session["Mobile"] = "Auto";
-		Session["Syscode"] = "NAccount";
-		Session["AccSvr"] = "web02";
-		//正式
-		Session["QRcode"] = "16618156"; //電子發票平台QRcode的密碼
-		Session["QRGenKey"] = "E747993D0AF3D0199A7A9A56DABC106F"; //利用genKey.bat轉成Base64的QRcode碼
+        Session["Syscode"] = "NAccount";
+        Session["AccSvr"] = "web02";
 	}
 
-	void Session_End(object sender, EventArgs e)
-	{
-		// 工作階段結束時執行的程式碼。 
-		// 注意: 只有在 Web.config 檔將 sessionstate 模式設定為 InProc 時，
-		// 才會引發 Session_End 事件。如果將工作階段模式設定為 StateServer 
-		// 或 SQLServer，就不會引發這個事件。
+    void Session_End(object sender, EventArgs e) 
+    {
+        // 工作階段結束時執行的程式碼。 
+        // 注意: 只有在 Web.config 檔將 sessionstate 模式設定為 InProc 時，
+        // 才會引發 Session_End 事件。如果將工作階段模式設定為 StateServer 
+        // 或 SQLServer，就不會引發這個事件。
 
-	}
-
+    }
+       
 </script>

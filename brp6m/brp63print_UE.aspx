@@ -35,8 +35,8 @@
 
 	protected void WordOut() {
 		Dictionary<string, string> _tplFile = new Dictionary<string, string>();
-		_tplFile.Add("apply", Server.MapPath("~/ReportTemplate") + @"\02新型專利申請書UE.docx");
-		_tplFile.Add("base", Server.MapPath("~/ReportTemplate") + @"\00基本資料表.docx");
+		_tplFile.Add("apply", Server.MapPath("~/ReportTemplate/申請書/02新型專利申請書UE.docx"));
+		_tplFile.Add("base", Server.MapPath("~/ReportTemplate/申請書/00基本資料表.docx"));
 		ipoRpt.CloneFromFile(_tplFile, true);
 		
 		DataTable dmp = ipoRpt.Dmp;
@@ -90,8 +90,8 @@
 			using (DataTable dtPrior = ipoRpt.Prior) {
 				for (int i = 0; i < dtPrior.Rows.Count; i++) {
 					string prior_date = "";
-					if (dtPrior.Rows[0]["prior_date"] != System.DBNull.Value && dtPrior.Rows[0]["prior_date"] != null) {
-						prior_date = Convert.ToDateTime(dtPrior.Rows[0]["prior_date"]).ToString("yyyy/MM/dd");
+					if (dtPrior.Rows[i]["prior_date"] != System.DBNull.Value && dtPrior.Rows[i]["prior_date"] != null) {
+						prior_date = Convert.ToDateTime(dtPrior.Rows[i]["prior_date"]).ToString("yyyy/MM/dd");
 					}
 					ipoRpt.CopyBlock("b_prior1");
 					ipoRpt.ReplaceBookmark("prior_num", (i + 1).ToString());

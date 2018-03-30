@@ -35,8 +35,8 @@
 
 	protected void WordOut() {
 		Dictionary<string, string> _tplFile = new Dictionary<string, string>();
-		_tplFile.Add("apply", Server.MapPath("~/ReportTemplate") + @"\24發明專利分割申請書IW1.docx");
-		_tplFile.Add("base", Server.MapPath("~/ReportTemplate") + @"\00基本資料表.docx");
+		_tplFile.Add("apply", Server.MapPath("~/ReportTemplate/申請書/24發明專利分割申請書IW1.docx"));
+		_tplFile.Add("base", Server.MapPath("~/ReportTemplate/申請書/00基本資料表.docx"));
 		ipoRpt.CloneFromFile(_tplFile, true);
 
 		DataTable dmp = ipoRpt.Dmp;

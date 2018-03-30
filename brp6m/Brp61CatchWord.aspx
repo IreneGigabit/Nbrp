@@ -26,44 +26,16 @@
 
 	protected Word._Application wordApp = null;
 	protected object oMissing = System.Reflection.Missing.Value;
-	protected object oCount=1;
+	protected object oCount1=1;
 
 	private void Page_Load(System.Object sender, System.EventArgs e) {
-		using (DBHelper conn = new DBHelper(Session["btbrtdb"].ToString())) {
-			string SQL = "select * from dmp_attach ";
-			SQL += "where seq = '" + Request["seq"] + "' ";
-			SQL += "and seq1 = '" + Request["seq1"] + "' ";
-			SQL += "and step_grade = '" + Request["step_grade"] + "' ";
-			SQL += "and attach_flag<>'D' ";
-			SQL += "and esend_flag='' ";
-			SQL += "and attach_desc like '%申請書%' ";
-			SQL += "and (source_name like '%.doc' or source_name like '%.docx') ";
-			DataTable dt = new DataTable();
-			conn.DataTable(SQL, dt);
-
 			Response.Write("$('#chkmsg').html('');\r\n");
-			if (dt.Rows.Count == 0) {
-				Response.Write("$('#chkmsg').html('<Font align=left color=\"red\" size=3>找不到申請書Word檔，請先上傳!!〈word檔判斷規則：副檔名為.doc或.docx，附件說明含有「申請書」字樣，不可勾□電子送件檔〉</font><BR>');\r\n");
-				if ((Request["debug"] ?? "").ToUpper() == "Y") {
-					Response.Write("$('#chkmsg').append('" + SQL.Replace("'", "\\'") + "<BR>');\r\n");
-				}
-				Response.End();
-			} else if (dt.Rows.Count > 1) {
-				Response.Write("$('#chkmsg').html('<Font align=left color=\"red\" size=3>找到多個申請書Word檔，請確認!!</font><BR>');\r\n");
-				if ((Request["debug"] ?? "").ToUpper() == "Y") {
-					Response.Write("$('#chkmsg').append('" + SQL.Replace("'", "\\'") + "<BR>');\r\n");
-				}
-				Response.End();
-			} else {
-				string orgPath = dt.Rows[0]["attach_path"].ToString();
-				if (orgPath.IndexOf(@"/brp/") == 0) {///brp/開頭要換掉
-					orgPath=orgPath.Substring(5);
-				}
-				string FileName = Server.MapPath("~/"+orgPath);
+			string FileName = Server.MapPath("~/" + Request["catch_path"]);
+
 				if (!File.Exists(FileName)) {
-					Response.Write("$('#chkmsg').html('<Font align=left color=\"red\" size=3>找不到申請書Word檔(" + FileName.Replace("\\", "\\\\") + ")!!</font><BR>');\r\n");
+					Response.Write("$('#chkmsg').html('<Font align=left color=\"red\" size=3>找不到說明書Word檔(" + FileName.Replace("\\", "\\\\") + ")!!</font><BR>');\r\n");
 					if ((Request["debug"] ?? "").ToUpper() == "Y") {
-						Response.Write("$('#chkmsg').append('虛擬目錄:~/" + orgPath + "<BR>');\r\n");
+						Response.Write("$('#chkmsg').append('虛擬目錄:~/" + Request["catch_path"] + "<BR>');\r\n");
 						Response.Write("$('#chkmsg').append('轉換後:" + FileName.Replace("\\", "\\\\") + "<BR>');\r\n");
 					}
 					Response.End();
@@ -161,54 +133,78 @@
 					wordApp = null;
 					GC.Collect();
 				}
-			}
-		}
 	}
 
-	//尋找特定tag
-	protected string Get_name(string pTag_name) {
+	//抓取摘要(電子申請格式)
+	protected string Get_eSummary() {
 		string get_value = "";
 		wordApp.Selection.HomeKey(ref wdStory, ref oMissing);
-		wordApp.Selection.Find.Text = pTag_name;
+		wordApp.Selection.Find.ClearFormatting();
+		wordApp.Selection.Find.Text = "【*摘要】";
 		wordApp.Selection.Find.Forward = true;
 		wordApp.Selection.Find.MatchWholeWord = true;
-
+		wordApp.Selection.Find.MatchWildcards = true;
+		
 		if (wordApp.Selection.Find.Execute(ref oMissing,
-				ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
-				ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
-				ref oMissing, ref oMissing)) {
-			wordApp.Selection.HomeKey(ref wdLine, ref oMissing);
-			wordApp.Selection.MoveDown(ref wdParagraph, ref oCount, ref wdExtend);//ctrl+shift+↓
-			wordApp.Selection.Copy();
+		ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+		ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+		ref oMissing, ref oMissing)) {
+			wordApp.Selection.MoveRight(wdCharacter, oCount1);
 
-			get_value = wordApp.Selection.Text;
-			get_value = get_value.Replace(((char)13).ToString(), "");//整行複製會帶最後的換行符號
-			get_value = get_value.Replace("　", "");//全形空白
-			get_value = get_value.Replace(((char)9).ToString(), "");//tab
+			wordApp.Selection.Find.Text = "【中文】";
+			wordApp.Selection.Find.Forward = true;
+			wordApp.Selection.Find.MatchWholeWord = true;
+			
+			if (wordApp.Selection.Find.Execute(ref oMissing,
+			ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+			ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+			ref oMissing, ref oMissing)) {
+				wordApp.Selection.MoveRight(wdCharacter, oCount1);
 
+				int i = 0;
+				while (++i < 100) {//防止無限迴圈
+					wordApp.Selection.MoveDown(ref wdParagraph, ref oCount1, ref oMissing);//ctrl+↓
+					wordApp.Selection.MoveDown(ref wdParagraph, ref oCount1, ref wdExtend);//ctrl+shift+↓
+
+					string strTemp = wordApp.Selection.Text;
+					strTemp = strTemp.Replace(((char)13).ToString(), "");//整行複製會帶最後的換行符號
+					strTemp = strTemp.Replace("　", "");//全形空白
+					strTemp = strTemp.Replace(((char)9).ToString(), "");//tab
+					strTemp = strTemp.Replace(((char)12).ToString(), "");//換頁
+					strTemp = strTemp.Trim();
+
+					if (strTemp.IndexOf("【英文】") > -1 || strTemp.IndexOf("【指定代表圖】")>-1) {
+						break;
+					} else {
+						get_value += strTemp;
+					}
+				}
+			}
 		}
-
+		
 		return get_value;
 	}
-	
-	//擷取word【附送書件】區塊,找到具結為止
-	protected List<string> Get_AttachBlock() {
-		List<string> attach_list = new List<string>();
-		
+
+	//抓取摘要(紙本申請格式)
+	protected string Get_pSummary() {
+		string get_value = "";
 		wordApp.Selection.HomeKey(ref wdStory, ref oMissing);
-		wordApp.Selection.Find.Text = "【附送書件】";
+		wordApp.Selection.Find.ClearFormatting();
+		wordApp.Selection.Find.Text = "中文*摘要：";
 		wordApp.Selection.Find.Forward = true;
 		wordApp.Selection.Find.MatchWholeWord = true;
+		wordApp.Selection.Find.MatchWildcards = true;
 
 		if (wordApp.Selection.Find.Execute(ref oMissing,
-				ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
-				ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
-				ref oMissing, ref oMissing)) {
+		ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+		ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+		ref oMissing, ref oMissing)) {
+			wordApp.Selection.MoveRight(wdCharacter, oCount1);
+
 			int i = 0;
 			while (++i < 100) {//防止無限迴圈
-				wordApp.Selection.MoveDown(ref wdParagraph, ref oCount, ref oMissing);//ctrl+↓
-				wordApp.Selection.MoveDown(ref wdParagraph, ref oCount, ref wdExtend);//ctrl+shift+↓
-				wordApp.Selection.Copy();
+				wordApp.Selection.MoveDown(ref wdParagraph, ref oCount1, ref oMissing);//ctrl+↓
+				wordApp.Selection.MoveDown(ref wdParagraph, ref oCount1, ref wdExtend);//ctrl+shift+↓
 
 				string strTemp = wordApp.Selection.Text;
 				strTemp = strTemp.Replace(((char)13).ToString(), "");//整行複製會帶最後的換行符號
@@ -217,25 +213,92 @@
 				strTemp = strTemp.Replace(((char)12).ToString(), "");//換頁
 				strTemp = strTemp.Trim();
 
-				if (strTemp.IndexOf("【檔案具結】") > -1 || strTemp == "【本申請書所檢送之PDF檔或影像檔與原本或正本相同】" || strTemp == "【本申請書所填寫之資料係為真實】") {
+				if (strTemp.IndexOf("英文") > -1 || strTemp.IndexOf("摘要：") > -1) {
 					break;
-				} else if (strTemp.IndexOf("【其他】") > -1 || strTemp == "【文件描述】" || strTemp == "【附送書件】" || strTemp == "") {
-					continue;
 				} else {
-					strTemp = strTemp.Replace("【文件檔名】", "【其他】");
-					attach_list.Add(strTemp);
+					get_value += strTemp;
 				}
-				//Response.Write(i + strTemp + "<BR>");
 			}
 		}
-		return attach_list;
+
+		return get_value;
 	}
-	
-	//正規切割(測試)
-	protected void MatchTag(string content) {
-		MatchCollection Matches = Regex.Matches(content, @"【(?<tag>.*)】(?<value>.*)", RegexOptions.IgnoreCase);
-		foreach (Match match in Matches) {
-			//attach_list.Add(new Content() { Tag = match.Groups["tag"].Value, Value = match.Groups["value"].Value });
+
+	//抓取專利申請範圍(電子申請格式)
+	protected string Get_ERange() {
+		string get_value = "";
+		wordApp.Selection.HomeKey(ref wdStory, ref oMissing);
+		wordApp.Selection.Find.ClearFormatting();
+		wordApp.Selection.Find.Text = "【*申請專利範圍】";
+		wordApp.Selection.Find.Forward = true;
+		wordApp.Selection.Find.MatchWholeWord = true;
+		wordApp.Selection.Find.MatchWildcards = true;
+
+		if (wordApp.Selection.Find.Execute(ref oMissing,
+		ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+		ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+		ref oMissing, ref oMissing)) {
+
+			int i = 0;
+			while (++i < 100) {//防止無限迴圈
+				wordApp.Selection.MoveDown(ref wdParagraph, ref oCount1, ref oMissing);//ctrl+↓
+				wordApp.Selection.MoveDown(ref wdParagraph, ref oCount1, ref wdExtend);//ctrl+shift+↓
+
+				string strTemp = wordApp.Selection.Text;
+				strTemp = strTemp.Replace(((char)13).ToString(), "");//整行複製會帶最後的換行符號
+				strTemp = strTemp.Replace("　", "");//全形空白
+				strTemp = strTemp.Replace(((char)9).ToString(), "");//tab
+				strTemp = strTemp.Replace(((char)12).ToString(), "");//換頁
+				strTemp = strTemp.Trim();
+
+				if (wordApp.Selection.Paragraphs[1].Range.ListFormat.ListString != "【第1項】"
+					&& (wordApp.Selection.Paragraphs[1].Range.ListFormat.ListString.IndexOf("【") > -1 || strTemp == "")) {
+					break;
+				} else {
+					get_value += strTemp;
+				}
+			}
 		}
+
+		return get_value;
+	}
+
+	//抓取專利申請範圍(紙本申請格式)
+	protected string Get_PRange() {
+		string get_value = "";
+		wordApp.Selection.HomeKey(ref wdStory, ref oMissing);
+		wordApp.Selection.Find.ClearFormatting();
+		wordApp.Selection.Find.Text = "申請專利範圍：";
+		wordApp.Selection.Find.Forward = true;
+		wordApp.Selection.Find.MatchWholeWord = true;
+		wordApp.Selection.Find.MatchWildcards = true;
+
+		if (wordApp.Selection.Find.Execute(ref oMissing,
+		ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+		ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+		ref oMissing, ref oMissing)) {
+
+			int i = 0;
+			while (++i < 100) {//防止無限迴圈
+				wordApp.Selection.MoveDown(ref wdParagraph, ref oCount1, ref oMissing);//ctrl+↓
+				wordApp.Selection.MoveDown(ref wdParagraph, ref oCount1, ref wdExtend);//ctrl+shift+↓
+
+				string strTemp = wordApp.Selection.Text;
+				strTemp = strTemp.Replace(((char)13).ToString(), "");//整行複製會帶最後的換行符號
+				strTemp = strTemp.Replace("　", "");//全形空白
+				strTemp = strTemp.Replace(((char)9).ToString(), "");//tab
+				strTemp = strTemp.Replace(((char)12).ToString(), "");//換頁
+				strTemp = strTemp.Trim();
+
+				if ((wordApp.Selection.Paragraphs[1].Range.ListFormat.ListString != "1" && wordApp.Selection.Paragraphs[1].Range.ListFormat.ListString != "")
+					|| (strTemp.IndexOf("2.") > -1 || strTemp == "")) {
+					break;
+				} else {
+					get_value += strTemp;
+				}
+			}
+		}
+
+		return get_value;
 	}
 </script>
