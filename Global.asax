@@ -7,54 +7,10 @@
     void Application_Start(object sender, EventArgs e) 
     {
         // 應用程式啟動時執行的程式碼
-        //Application["CasePath"] = "\\\\web08\\Data$\\document\\XAccount";
-        Application["CasePath"] = Server.MapPath("~/upload");
-        Application["uploadDir"] = "nacc";
-        Application["uploadPath"] = Server.MapPath("~/upload");
-		Application["rootPath"] = "http://localhost/NACC";
-        Application["photoPath"] = "D:\\Data\\Document\\NACC\\Temp\\images";
-		Application["MailServer"] = "localhost";
-		Application["MailAddr"] = "front.desk@my-farm.com.tw";
-		Application["CRSmail"] = "customer.service@my-farm.com.tw";
-		Application["farmTel"] = "049-2821418";
-		Application["farmFax"] = "049-2821492";
-		Application["farmAddr"] = "南投縣水里鄉上安村安田路9號";
-		Application["MasilUID"] = "uuuu";
-		Application["MailPWD"] = "pppp";
-		Application["LoginImg"] = "NO";
-
-		Application["P12File"] = Server.MapPath("~/inc") + "\\API-Project-f47f3742fc86.p12";
-		Application["JsonFile"] = Server.MapPath("~/inc") + "\\snoopy-calendar.json";
-		Application["svrEmail"] = "mycalendarsvr@api-project-114451378278.iam.gserviceaccount.com";
-		Application["usrEmail"] = "snop222@gmail.com";
-		Application["gcTestUID"] = "kitty";
-		//Application["CalendarID"] = "primary";
-		Application["CalendarID"] = "u0khi7hf8pd2skn7rosg42973k@group.calendar.google.com";
-		Application["CldrStop"] = "GO";
-		
-		//Application["P12File"] = Server.MapPath("~/inc") + "\\MyFarmCalendar-e1c3efaf13e9.p12";
-		//Application["svrEmail"] = "myfarm-52@myfarmcalendar.iam.gserviceaccount.com";
-		//Application["usrEmail"] = "front.desk@my-farm.com.tw";
-		//Application["gcTestUID"] = "my003";
-		//Application["CalendarID"] = "primary";
-
-		//SqlConnection cnn = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["SQLcnnstring"].ToString());
-		//string SQL = "SELECT * FROM tbCode WHERE vcType = 'Application'";
-		//SqlCommand cmd = new SqlCommand(SQL, cnn);
-		//cnn.Open();
-		//SqlDataReader dr = cmd.ExecuteReader();
-		//string sDefStr = "";
-		////string sSpeCtrl = "";
-		//while (dr.Read()) {
-		//	sDefStr = (dr["vcRef1"] == DBNull.Value) ? dr["nvRef4"].ToString() : dr["vcRef1"].ToString();
-		//	Application[dr["vcNo"].ToString()] = sDefStr;
-		//}
-		//cnn.Close();
 	}
     
     void Application_End(object sender, EventArgs e) {
         //  應用程式關閉時執行的程式碼
-
     }
         
     void Application_Error(object sender, EventArgs e)  { 
@@ -72,40 +28,23 @@
 				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["test_N_btbrtdb"].ToString();//使用者測試環境
 				break;
 			case "SINN05":
-				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["prod_N_btbrtdb"].ToString();//正式環境
+				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["prod_N_btbrtdb"].ToString();//正式環境N
 				break;
 			case "SIC08":
-				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["prod_C_btbrtdb"].ToString();//正式環境
+				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["prod_C_btbrtdb"].ToString();//正式環境C
 				break;
 			case "SIS08":
-				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["prod_S_btbrtdb"].ToString();//正式環境
+				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["prod_S_btbrtdb"].ToString();//正式環境S
 				break;
 			case "SIK08":
-				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["prod_K_btbrtdb"].ToString();//正式環境
+				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["prod_K_btbrtdb"].ToString();//正式環境K
 				break;
 			default:
 				Session["btbrtdb"] = System.Configuration.ConfigurationManager.ConnectionStrings["dev_btbrtdb"].ToString();//開發環境
 				break;
 		}
 
-        Session["Password"] = false;
         Session["UserID"] = Session.SessionID.ToString();
-		Session["UserName"] = "";
-		Session["UserGrp"] = "";
-        Session["fSQL"] = "";
-		Session["CaptchaImageText"] = "";
-		Session["ExtMsg"] = "";
-		Session["CustPasswd"] = false;
-		Session["SCodeID"] = "";
-		Session["CustID"] = "";
-		Session["CustName"] = "";
-		Session["CustEmail"] = "";        
-		Session["Loc"] = "";
-		Session["SvrName"] = "SIF02";
-		Session["SvrName1"] = "SIF02";
-		Session["Mobile"] = "Auto";
-        Session["Syscode"] = "NAccount";
-        Session["AccSvr"] = "web02";
 	}
 
     void Session_End(object sender, EventArgs e) 
@@ -114,7 +53,6 @@
         // 注意: 只有在 Web.config 檔將 sessionstate 模式設定為 InProc 時，
         // 才會引發 Session_End 事件。如果將工作階段模式設定為 StateServer 
         // 或 SQLServer，就不會引發這個事件。
-
     }
        
 </script>

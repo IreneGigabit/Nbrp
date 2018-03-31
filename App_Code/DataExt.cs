@@ -224,7 +224,7 @@ public static class DataExt {
 		DateTime result = DateTime.Now;
 		if (dr[colName] != DBNull.Value && dr[colName] != null) {
 			if (!DateTime.TryParse(dr[colName].ToString(), out result))
-				throw new Exception("日期格式數據轉換失敗(" + colName + ")");
+				throw new Exception("日期格式轉換失敗(" + colName + ")");
 		}
 		return result;
 	}
@@ -239,7 +239,7 @@ public static class DataExt {
 		DateTime time = DateTime.Now;
 		if (dr[colName] != DBNull.Value && dr[colName] != null) {
 			if (!DateTime.TryParse(dr[colName].ToString(), out time))
-				throw new Exception("日期格式數據轉換失敗(" + colName + ")");
+				throw new Exception("日期格式轉換失敗(" + colName + ")");
 			result = time;
 		}
 		return result;
@@ -254,7 +254,7 @@ public static class DataExt {
 		short result = 0;
 		if (dr[colName] != DBNull.Value && dr[colName] != null) {
 			if (!short.TryParse(dr[colName].ToString(), out result))
-				throw new Exception("短整形轉換失敗(" + colName + ")");
+				throw new Exception("短整數轉換失敗(" + colName + ")");
 		}
 		return result;
 	}
@@ -269,7 +269,7 @@ public static class DataExt {
 
 		if (dr[colName] != DBNull.Value && dr[colName] != null) {
 			if (!int.TryParse(dr[colName].ToString(), out result))
-				throw new Exception("整形轉換失敗(" + colName + ")");
+				throw new Exception("整數轉換失敗(" + colName + ")");
 		}
 		return result;
 	}
@@ -283,7 +283,7 @@ public static class DataExt {
 		double result = 0.00;
 		if (dr[colName] != DBNull.Value && dr[colName] != null) {
 			if (!double.TryParse(dr[colName].ToString(), out result))
-				throw new Exception("雙精度類型轉換失敗(" + colName + ")");
+				throw new Exception("雙精數類型轉換失敗(" + colName + ")");
 		}
 		return result;
 	}
@@ -296,7 +296,7 @@ public static class DataExt {
 		float result = 0.00f;
 		if (dr[colName] != DBNull.Value && dr[colName] != null) {
 			if (!float.TryParse(dr[colName].ToString(), out result))
-				throw new Exception("單精度類型轉換失敗(" + colName + ")");
+				throw new Exception("單精數類型轉換失敗(" + colName + ")");
 		}
 
 		return result;

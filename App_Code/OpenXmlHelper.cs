@@ -303,7 +303,7 @@ public class OpenXmlHelper {
 		if (text == "")
 			ReplaceBookmark(bookmarkName, ptext, false, System.Drawing.Color.Empty);
 		else
-			ReplaceBookmark(bookmarkName, text, false);
+			ReplaceBookmark(bookmarkName, text, false, System.Drawing.Color.Empty);
 	}
 	/// <summary>
 	/// 取代書籤
@@ -364,15 +364,17 @@ public class OpenXmlHelper {
 					if (text == "" && delFlag) {
 						bookmarkStart.Parent.Remove();
 					} else {
-						//BookmarkEnd bookmarkEnd = bookMarkEnds.Where(i => i.Id.Value == id).FirstOrDefault();
 						BookmarkEnd bookmarkEnd = bookmarkStart.Parent.Descendants<BookmarkEnd>().Where(i => i.Id.Value == id).FirstOrDefault();
 
 						//留第一個run其他run刪除,從BookmarkStart刪到BookmarkEnd為止
 						OpenXmlElement[] bookmarkItems = bookmarkStart.Parent.ChildElements.ToArray();
+						//HttpContext.Current.Response.Write(bookmarkItems.Count());
+						//HttpContext.Current.Response.End();
+
 						bool canRemove = false;
 						int bIndex = 0;
 						foreach (OpenXmlElement item in bookmarkItems) {
-							if (item.GetType() == typeof(BookmarkEnd)) {
+							if (item.GetType() == typeof(BookmarkEnd) && bookmarkEnd != null && bookmarkEnd.Id == id) {
 								break;
 							}
 							if (canRemove && item.GetType() == typeof(Run)) {
@@ -399,7 +401,8 @@ public class OpenXmlHelper {
 								}
 								bIndex++;
 							}
-							if (item.GetType() == typeof(BookmarkStart)) {
+							//if (item.GetType() == typeof(BookmarkStart)) {
+							if (item.Equals(bookmarkStart)) {
 								canRemove = true;
 							}
 						}
@@ -799,6 +802,7 @@ public class OpenXmlHelper {
 				 });
 
 		outDoc.MainDocumentPart.Document.Body.AppendChild(new Paragraph(new Run(element)));
+		outDoc.MainDocumentPart.Document.Body.AppendChild(new Paragraph());
 	}
 	#endregion
 

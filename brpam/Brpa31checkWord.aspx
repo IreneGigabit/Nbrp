@@ -108,7 +108,6 @@
 					//20170808 增加檢查規費
 					string fee_line = Get_name("【繳費金額】");
 					string[] split_fee = fee_line.Split('】');
-					
 					if (split_fee.Length == 2) {
 						Response.Write("var fee=document.getElementsByName('fees')[0].value;\r\n");
 						Response.Write("if (fee!='" + split_fee[1].Trim() + "'){\r\n");
@@ -116,7 +115,28 @@
 						Response.Write("	$('#chkmsg').append('<Font align=left color=\"red\" size=3>【繳費金額】官發應繳規費('+fee+')與申請書填寫金額(" + split_fee[1].Trim() + ")不符!!</font><BR>');\r\n");
 						Response.Write("}\r\n");
 					}
-					
+
+					//20180331 增加檢查收據抬頭
+					string receipt_line = Get_name("【收據抬頭】");
+					string[] split_receipt = receipt_line.Split('】');
+					string receipt_type = "B";
+					string receipt_text = "空白";
+					if (split_receipt.Length == 2) {
+						if (split_receipt[1].IndexOf("(代繳人") > -1) {
+							receipt_type = "C";
+							receipt_text = "專利權人(代繳人)";
+						} else {
+							receipt_type = "A";
+							receipt_text = "專利權人";
+						}
+					}
+					Response.Write("var receipt_title=document.getElementsByName('receipt_title')[0].value;\r\n");
+					Response.Write("var receipt_text=$('#receipt_title :selected').text();\r\n");
+					Response.Write("if (receipt_title!='" + receipt_type + "'){\r\n");
+					Response.Write("	errFlag=true;\r\n");
+					Response.Write("	$('#chkmsg').append('<Font align=left color=\"red\" size=3>【收據抬頭】申請書抬頭種類(" + receipt_text + ")與官發收據種類('+receipt_text+')不符!!</font><BR>');\r\n");
+					Response.Write("}\r\n");
+
 					//檢查附送書件
 					//20170126 原用tagList定義的tag名檢查,改用word【附送書件】區塊,查dmp_attach是否有上傳
 					List<string> attachList = Get_AttachBlock();

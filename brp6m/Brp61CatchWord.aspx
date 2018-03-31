@@ -30,12 +30,17 @@
 
 	private void Page_Load(System.Object sender, System.EventArgs e) {
 		Response.Write("$('#chkmsg').html('');\r\n");
-		string FileName = Server.MapPath("~/" + Request["catch_path"]);
 
+		string orgPath = Request["catch_path"];
+		if (orgPath.IndexOf(@"/brp/") == 0) {///brp/開頭要換掉
+			orgPath = orgPath.Substring(5);
+		}
+
+		string FileName = Server.MapPath("~/" + orgPath);
 		if (!File.Exists(FileName)) {
 			Response.Write("$('#chkmsg').html('<Font align=left color=\"red\" size=3>找不到說明書Word檔(" + FileName.Replace("\\", "\\\\") + ")!!</font><BR>');\r\n");
 			if ((Request["debug"] ?? "").ToUpper() == "Y") {
-				Response.Write("$('#chkmsg').append('虛擬目錄:~/" + Request["catch_path"] + "<BR>');\r\n");
+				Response.Write("$('#chkmsg').append('虛擬目錄:~/" + orgPath + "<BR>');\r\n");
 				Response.Write("$('#chkmsg').append('轉換後:" + FileName.Replace("\\", "\\\\") + "<BR>');\r\n");
 			}
 			Response.End();
@@ -113,7 +118,7 @@
 		ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
 		ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
 		ref oMissing, ref oMissing)) {
-			wordApp.Selection.MoveRight(wdCharacter, oCount1);
+			wordApp.Selection.MoveRight(ref wdCharacter, ref oCount1, ref oMissing);
 
 			wordApp.Selection.Find.Text = "【中文】";
 			wordApp.Selection.Find.Forward = true;
@@ -123,7 +128,7 @@
 			ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
 			ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
 			ref oMissing, ref oMissing)) {
-				wordApp.Selection.MoveRight(wdCharacter, oCount1);
+				wordApp.Selection.MoveRight(ref wdCharacter, ref oCount1, ref oMissing);
 
 				int i = 0;
 				while (++i < 100) {//防止無限迴圈
@@ -163,7 +168,7 @@
 		ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
 		ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
 		ref oMissing, ref oMissing)) {
-			wordApp.Selection.MoveRight(wdCharacter, oCount1);
+			wordApp.Selection.MoveRight(ref wdCharacter, ref oCount1, ref oMissing);
 
 			int i = 0;
 			while (++i < 100) {//防止無限迴圈
