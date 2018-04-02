@@ -56,7 +56,7 @@
 				Response.End();
 			} else {
 				string orgPath = dt.Rows[0]["attach_path"].ToString();
-				if (orgPath.IndexOf(@"/brp/") == 0) {///brp/開頭要換掉
+				if (orgPath.IndexOf(@"/brp/") == 0) {//『/brp/』開頭要換掉
 					orgPath=orgPath.Substring(5);
 				}
 				string FileName = Server.MapPath("~/"+orgPath);

@@ -366,15 +366,15 @@ public class IPOReport : OpenXmlHelper {
 		CopyBlock(baseDocName, "base_title");
 		//申請人
 		for (int i = 0; i < Apcust.Rows.Count; i++) {
-			CopyBlock(baseDocName, "base_apcust1");
+			CopyBlock(baseDocName, "base_apcust");
 			ReplaceBookmark("base_ap_num", (i + 1).ToString());
 			ReplaceBookmark("base_ap_country", Apcust.Rows[i]["Country_name"].ToString());
 			ReplaceBookmark("ap_class", Apcust.Rows[i]["apclass_name"].ToString());
 			if (Apcust.Rows[i]["ap_country"].ToString() == "T") {
-				CopyBlock(baseDocName, "base_apcust2");
 				ReplaceBookmark("apcust_no", Apcust.Rows[i]["apcust_no"].ToString());
+			} else {
+				ReplaceBookmark("apcust_no", "", true);
 			}
-			CopyBlock(baseDocName, "base_apcust3");
 			ReplaceBookmark("base_ap_cname_title", Apcust.Rows[i]["Title_cname"].ToString());
 			ReplaceBookmark("base_ap_ename_title", Apcust.Rows[i]["Title_ename"].ToString());
 			ReplaceBookmark("base_ap_cname", Apcust.Rows[i]["Cname_string"].ToString().ToXmlUnicode());
@@ -393,9 +393,8 @@ public class IPOReport : OpenXmlHelper {
 			ReplaceBookmark("ap_erep", Apcust.Rows[i]["ap_erep"].ToString().ToXmlUnicode(true));
 		}
 		//代理人
-		CopyBlock(baseDocName, "base_agent");
 		for (int i = 0; i < Agent.Rows.Count; i++) {
-			CopyBlock(baseDocName, "base_apcust");
+			CopyBlock(baseDocName, "base_agent");
 			ReplaceBookmark("agt_idno1", Agent.Rows[i]["agt_idno1"].ToString());
 			ReplaceBookmark("agt_id1", Agent.Rows[i]["agt_id1"].ToString());
 			ReplaceBookmark("base_agt_name1", Agent.Rows[i]["agt_name1"].ToString());
@@ -411,18 +410,18 @@ public class IPOReport : OpenXmlHelper {
 			ReplaceBookmark("agatt_tel2", Agent.Rows[i]["agt_tel"].ToString());
 			ReplaceBookmark("agatt_fax2", Agent.Rows[i]["agt_fax"].ToString());
 		}
-
+		
 		if (antTitle != "") {
 			//發明人/新型創作/設計人
 			for (int i = 0; i < Ant.Rows.Count; i++) {
-				CopyBlock(baseDocName, "base_ant1");
+				CopyBlock(baseDocName, "base_ant");
 				ReplaceBookmark("base_ant_num", antTitle + (i + 1).ToString());
 				ReplaceBookmark("base_ant_country", Ant.Rows[i]["Country_name"].ToString());
 				if (Ant.Rows[i]["ant_country"].ToString() == "T") {
-					CopyBlock(baseDocName, "base_ant2");
 					ReplaceBookmark("ant_id", Ant.Rows[i]["ant_id"].ToString());
+				} else {
+					ReplaceBookmark("ant_id", "", true);
 				}
-				CopyBlock(baseDocName, "base_ant3");
 				ReplaceBookmark("base_ant_cname", Ant.Rows[i]["Cname_string"].ToString().ToXmlUnicode());
 				ReplaceBookmark("base_ant_ename", Ant.Rows[i]["Ename_string"].ToString().ToXmlUnicode(true));
 				AddParagraph();

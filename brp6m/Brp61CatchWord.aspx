@@ -32,7 +32,7 @@
 		Response.Write("$('#chkmsg').html('');\r\n");
 
 		string orgPath = Request["catch_path"];
-		if (orgPath.IndexOf(@"/brp/") == 0) {///brp/開頭要換掉
+		if (orgPath.IndexOf(@"/brp/") == 0) {//『/brp/』開頭要換掉
 			orgPath = orgPath.Substring(5);
 		}
 
