@@ -6,10 +6,6 @@
 <%@ Import Namespace = "System.Collections.Generic"%>
 
 <script runat="server">
-	protected string in_scode = "";
-	protected string in_no = "";
-	protected string branch = "";
-
 	protected IPOReport ipoRpt = null;
 
 	private void Page_Load(System.Object sender, System.EventArgs e) {
@@ -18,14 +14,17 @@
 		Response.Expires = -1;
 		Response.Clear();
 
-		in_scode = (Request["in_scode"] ?? "").ToString();//n100
-		in_no = (Request["in_no"] ?? "").ToString();//20170103001
-		branch = (Request["branch"] ?? "").ToString();//N
+		string in_scode = (Request["in_scode"] ?? "").ToString();//n100
+		string in_no = (Request["in_no"] ?? "").ToString();//20170103001
+		string branch = (Request["branch"] ?? "").ToString();//N
 		string rectitle = (Request["receipt_title"] ?? "").ToString();//N
 
 		try {
-			//電子收據第2階段上線後要廢除RectitleTitle參數
-			ipoRpt = new IPOReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch, rectitle);
+            ipoRpt = new IPOReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch, rectitle)
+            {
+                ReportCode = "WMA1",
+            }.Init();
+
 			WordOut();
 		}
 		finally {
@@ -39,24 +38,14 @@
 		_tplFile.Add("base", Server.MapPath("~/ReportTemplate/申請書/00基本資料表.docx"));
 		ipoRpt.CloneFromFile(_tplFile, true);
 		
+		string docFileName = ipoRpt.Seq + "-[專利補正文件申請書].docx";
+		
 		DataTable dmp = ipoRpt.Dmp;
 		if (dmp.Rows.Count > 0) {
 			//標題區塊
 			ipoRpt.CopyBlock("b_title");
 			//專利類別
-			string Case1nm = "";
-			switch (dmp.Rows[0]["CASE1"].ToString().Substring(0, 2)) {
-				case "IG":
-					Case1nm = "發明";
-					break;
-				case "UG":
-					Case1nm = "新型";
-					break;
-				case "DG":
-					Case1nm = "設計";
-					break;
-			}
-			ipoRpt.ReplaceBookmark("case1nm", Case1nm);
+			ipoRpt.ReplaceBookmark("case1nm", dmp.Rows[0]["s_case1nm"].ToString());
 			//申請案號
 			if (dmp.Rows[0]["change_no"].ToString() != "") {
 				ipoRpt.ReplaceBookmark("apply_no", dmp.Rows[0]["change_no"].ToString());
@@ -65,7 +54,7 @@
 			}
 			//事務所或申請人案件編號
 			ipoRpt.ReplaceBookmark("seq", ipoRpt.Seq + "-" + dmp.Rows[0]["scode1"].ToString());
-			//中文發明名稱 / 英文發明名稱
+			//中文專利名稱 / 英文專利名稱
 			ipoRpt.ReplaceBookmark("cappl_name", dmp.Rows[0]["cappl_name"].ToString().ToXmlUnicode());
 			ipoRpt.ReplaceBookmark("eappl_name", dmp.Rows[0]["eappl_name"].ToString().ToXmlUnicode(true));
 			//申請人
@@ -91,7 +80,7 @@
 			ipoRpt.ReplaceBookmark("receipt_name", ipoRpt.RectitleName);
 			//附送書件
 			//ipoRpt.CopyReplaceBlock("b_attach", "#seq#", ipoRpt.Seq);
-			ipoRpt.CopyReplaceBlock("b_attach", new Dictionary<string, string>() { { "#seq#", ipoRpt.Seq }, { "#case1nm#", Case1nm } });
+			ipoRpt.CopyReplaceBlock("b_attach", new Dictionary<string, string>() { { "#seq#", ipoRpt.Seq }, { "#case1nm#", dmp.Rows[0].SafeRead("s_case1nm","") } });
 			//具結
 			ipoRpt.CopyBlock("b_sign");
 
@@ -102,7 +91,7 @@
 			}
 		}
 
-		ipoRpt.Flush(ipoRpt.Seq + "-[專利補正文件申請書].docx");
+		ipoRpt.Flush(docFileName);
 		ipoRpt.SetPrint();
 	}
 </script>

@@ -21,6 +21,33 @@ public static class DataExt {
 	static string debugStr = "";
 
 	#region DataTable 擴展
+	/// <summary>
+	/// 顯示DataTable內容。
+	/// </summary>
+	static public void ShowTable(this DataTable table) {
+		string showStr = "";
+		if (table != null) {
+			showStr += "<table width='100%' border='1'>\n";
+			//表頭
+			showStr += "<tr>\n";
+			foreach (DataColumn column in table.Columns) {
+				showStr += "<td>" + column.ColumnName + "</td>\n";
+			}
+			showStr += "</tr>\n";
+
+			//內容
+			for (int i = 0; i < table.Rows.Count; i++) {
+				showStr += "<tr>\n";
+				foreach (DataColumn column in table.Columns) {
+					showStr += "<td>" + table.Rows[i][column.ColumnName] + "</td>\n";
+				}
+				showStr += "</tr>\n";
+			}
+			showStr += "</table>\n";
+		}
+		HttpContext.Current.Response.Write(showStr);
+	}
+
 	public static void ToDictionary(this DataTable table, Dictionary<string, string> RtnVal) {
 		table.ToDictionary(RtnVal, false);
 	}
@@ -244,6 +271,22 @@ public static class DataExt {
 		}
 		return result;
 	}
+    /// <summary>
+    /// 獲取DateTime Format後的字串
+    /// </summary>
+    /// <param name="colName">欄位名稱</param>
+    /// <param name="format">ToString的Format</param>
+    /// <returns></returns>
+    public static string GetDateTimeString(this IDataReader dr, string colName,string format) {
+        string result = "";
+        if (dr[colName] != DBNull.Value && dr[colName] != null) {
+            DateTime time = DateTime.Now;
+            if (!DateTime.TryParse(dr[colName].ToString(), out time))
+                throw new Exception("日期格式轉換失敗(" + colName + ")");
+            result = time.ToString(format);
+        }
+        return result;
+    }
 
 	/// <summary>
 	/// 獲取Int16
@@ -342,4 +385,43 @@ public static class DataExt {
 		return false;
 	}
 	#endregion
+
+	#region DataRow擴展(獲取指定型別)
+	/// <summary>
+	/// 獲取指定型別
+	/// </summary> 
+	/// <param name="fieldName">欄位名稱</param>
+	/// <param name="defaultValue">若是null時回傳預設值</param>
+	/// <returns></returns>
+	public static T SafeRead<T>(this DataRow row, string fieldName, T defaultValue) {
+		try {
+			object obj = row[fieldName];
+			if (obj == null || obj == System.DBNull.Value)
+				return defaultValue;
+
+			return (T)Convert.ChangeType(obj, defaultValue.GetType());
+		}
+		catch {
+			return defaultValue;
+		}
+	}
+
+    /// <summary>
+    /// 獲取DateTime Format後的字串
+    /// </summary>
+    /// <param name="colName">欄位名稱</param>
+    /// <param name="format">ToString的Format</param>
+    /// <returns></returns>
+    public static string GetDateTimeString(this DataRow row, string colName, string format) {
+        string result = "";
+        if (row[colName] != DBNull.Value && row[colName] != null) {
+            DateTime time = DateTime.Now;
+            if (!DateTime.TryParse(row[colName].ToString(), out time))
+                throw new Exception("日期格式轉換失敗(" + colName + ")");
+            result = time.ToString(format);
+        }
+        return result;
+    }
+	#endregion
+
 }

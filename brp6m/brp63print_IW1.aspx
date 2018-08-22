@@ -6,10 +6,6 @@
 <%@ Import Namespace = "System.Collections.Generic"%>
 
 <script runat="server">
-	protected string in_scode = "";
-	protected string in_no = "";
-	protected string branch = "";
-
 	protected IPOReport ipoRpt = null;
 
 	private void Page_Load(System.Object sender, System.EventArgs e) {
@@ -18,14 +14,16 @@
 		Response.Expires = -1;
 		Response.Clear();
 
-		in_scode = (Request["in_scode"] ?? "").ToString();//n100
-		in_no = (Request["in_no"] ?? "").ToString();//20170103001
-		branch = (Request["branch"] ?? "").ToString();//N
+        string in_scode = (Request["in_scode"] ?? "").ToString();//n100
+        string in_no = (Request["in_no"] ?? "").ToString();//20170103001
+        string branch = (Request["branch"] ?? "").ToString();//N
 		string rectitle = (Request["receipt_title"] ?? "").ToString();//N
 
 		try {
-			//電子收據第2階段上線後要廢除RectitleTitle參數
-			ipoRpt = new IPOReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch, rectitle);
+            ipoRpt = new IPOReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch, rectitle)
+            {
+                ReportCode = "IW1",
+            }.Init();
 			WordOut();
 		}
 		finally {
@@ -39,6 +37,9 @@
 		_tplFile.Add("base", Server.MapPath("~/ReportTemplate/申請書/00基本資料表.docx"));
 		ipoRpt.CloneFromFile(_tplFile, true);
 
+		//string docFileName = string.Format("{0}-{1}_division_form-1.docx", Request["se_scode"], Request["wordname"]);
+		string docFileName = string.Format("{0}-{1}_division_form-1.docx", ipoRpt.Seq, Request["wordname"]);
+		
 		DataTable dmp = ipoRpt.Dmp;
 		if (dmp.Rows.Count > 0) {
 			//標題區塊
@@ -57,7 +58,7 @@
 			}
 			//事務所或申請人案件編號
 			ipoRpt.ReplaceBookmark("seq", ipoRpt.Seq + "-" + dmp.Rows[0]["scode1"].ToString());
-			//中文名稱 / 英文名稱
+			//中文發明名稱 / 英文發明名稱
 			ipoRpt.ReplaceBookmark("cappl_name", dmp.Rows[0]["cappl_name"].ToString().ToXmlUnicode());
 			ipoRpt.ReplaceBookmark("eappl_name", dmp.Rows[0]["eappl_name"].ToString().ToXmlUnicode(true));
 			//申請人
@@ -100,6 +101,12 @@
 			
 			//文本資訊/繳費資訊
 			ipoRpt.CopyBlock("b_content");
+			//援用原申請案就相同創作於申請日同日
+			if (dmp.Rows[0]["same_apply"].ToString() == "Y") {
+				ipoRpt.ReplaceBookmark("same_apply", "是");
+			} else {
+				ipoRpt.ReplaceBookmark("same_apply", "否");
+			}
 			ipoRpt.ReplaceBookmark("receipt_name", ipoRpt.RectitleName);
 			//附送書件
 			ipoRpt.CopyReplaceBlock("b_attach", "#seq#", ipoRpt.Seq);
@@ -112,12 +119,8 @@
 				ipoRpt.AppendBaseData("base", "發明人");//產生基本資料表
 			}
 		}
-
-		if (Request["wordname"].ToString() == "IW1_1") {
-			ipoRpt.Flush(Request["se_scode"] + "-IW1_1_division_form-1.docx");//IW1_1發明專利分割申請書(含說明書)
-		} else {
-			ipoRpt.Flush(Request["se_scode"] + "-IW1_division_form-1.docx");//設計專利分割申請書
-		}
+		
+		ipoRpt.Flush(docFileName);
 		ipoRpt.SetPrint();
 	}
 </script>

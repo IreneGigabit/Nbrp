@@ -48,7 +48,7 @@
 		wordApp = new Word.Application();
 
 		object oFalse = false;//執行過程不在畫面上開啟 Word
-		object oTrue = false;//唯讀模式
+		object oTrue = true;//唯讀模式
 		object oFilePath = FileName;    //檔案路徑
 		Word._Document myDoc = wordApp.Documents.Open(ref oFilePath, ref oMissing, ref oTrue, ref oMissing,
 							ref oMissing, ref oMissing, ref oMissing, ref oMissing,

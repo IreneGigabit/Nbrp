@@ -71,7 +71,7 @@
 				wordApp = new Word.Application();
 
 				object oFalse = false;//執行過程不在畫面上開啟 Word
-				object oTrue = false;//唯讀模式
+				object oTrue = true;//唯讀模式
 				object oFilePath = FileName;    //檔案路徑
 				Word._Document myDoc = wordApp.Documents.Open(ref oFilePath, ref oMissing, ref oTrue, ref oMissing,
 									ref oMissing, ref oMissing, ref oMissing, ref oMissing,
@@ -85,25 +85,28 @@
 					string title_line = Get_name("【");
 					title_line = title_line.Replace("【", "").Replace("】", "");
 					SQL = " select form_name from cust_code where Code_type='word_tit_p' and code_name='" + title_line + "' ";
-					using (SqlDataReader dr = conn.ExecuteReader(SQL)) {
-						if (!dr.Read()) {
-							Response.Write("$('#chkmsg').append('<Font align=left color=\"red\" size=3>找不到申請書設定，請聯繫資訊人員!!</font><BR>');\r\n");
-							if ((Request["debug"] ?? "").ToUpper() == "Y") {
-								Response.Write("$('#chkmsg').append('" + SQL.Replace("'", "\\'") + "<BR>');\r\n");
-							}
-						} else {
-							string[] arr_appl = dr.SafeRead("form_name", "").Split('|');//中文專利名稱tag|英文專利名稱tag
-							string cappl_line = Get_name(arr_appl[0]);//抓中文專利名稱tag
-							string[] split_cappl = cappl_line.Split('】');
-							
-							//檢查中文專利名稱
-							Response.Write("var cappl_name=document.getElementsByName('cappl_name')[0].value;\r\n");
-							Response.Write("if (cappl_name.HTMLEncode()!='" + split_cappl[1].Trim() + "'.HTMLEncode()){\r\n");
-							Response.Write("	errFlag=true;\r\n");
-							Response.Write("	$('#chkmsg').append('<Font align=left color=\"red\" size=3>" + split_cappl[0] + "】申請書案件名稱(" + split_cappl[1].Trim() + ")與案件主檔('+cappl_name+')不符!!</font><BR>');\r\n");
-							Response.Write("}\r\n");
-						}
-					}
+                    using (SqlDataReader dr = conn.ExecuteReader(SQL)) {
+                        if (!dr.Read()) {
+                            Response.Write("$('#chkmsg').append('<Font align=left color=\"red\" size=3>找不到申請書設定，請聯繫資訊人員!!</font><BR>');\r\n");
+                            if ((Request["debug"] ?? "").ToUpper() == "Y") {
+                                Response.Write("$('#chkmsg').append('" + SQL.Replace("'", "\\'") + "<BR>');\r\n");
+                            }
+                        } else {
+                            //該申請書有專利名稱TAG才要檢查
+                            if (dr.SafeRead("form_name", "") != "無") {
+                                string[] arr_appl = dr.SafeRead("form_name", "").Split('|');//中文專利名稱tag|英文專利名稱tag
+                                string cappl_line = Get_name(arr_appl[0]);//抓中文專利名稱tag
+                                string[] split_cappl = cappl_line.Split('】');
+
+                                //檢查中文專利名稱
+                                Response.Write("var cappl_name=document.getElementsByName('cappl_name')[0].value;\r\n");
+                                Response.Write("if (cappl_name.HTMLEncode()!='" + split_cappl[1].Trim() + "'.HTMLEncode()){\r\n");
+                                Response.Write("	errFlag=true;\r\n");
+                                Response.Write("	$('#chkmsg').append('<Font align=left color=\"red\" size=3>" + split_cappl[0] + "】申請書案件名稱(" + split_cappl[1].Trim() + ")與案件主檔('+cappl_name+')不符!!</font><BR>');\r\n");
+                                Response.Write("}\r\n");
+                            }
+                        }
+                    }
 					
 					//20170808 增加檢查規費
 					string fee_line = Get_name("【繳費金額】");
@@ -125,7 +128,7 @@
 						if (split_receipt[1].IndexOf("(代繳人") > -1) {
 							receipt_type = "C";
 							receipt_text = "專利權人(代繳人)";
-						} else {
+						} else if (split_receipt[1].Trim() != "") {
 							receipt_type = "A";
 							receipt_text = "專利權人";
 						}
@@ -189,6 +192,7 @@
 	protected string Get_name(string pTag_name) {
 		string get_value = "";
 		wordApp.Selection.HomeKey(ref wdStory, ref oMissing);
+		wordApp.Selection.Find.ClearFormatting(); 
 		wordApp.Selection.Find.Text = pTag_name;
 		wordApp.Selection.Find.Forward = true;
 		wordApp.Selection.Find.MatchWholeWord = true;
@@ -216,6 +220,7 @@
 		List<string> attach_list = new List<string>();
 		
 		wordApp.Selection.HomeKey(ref wdStory, ref oMissing);
+		wordApp.Selection.Find.ClearFormatting();
 		wordApp.Selection.Find.Text = "【附送書件】";
 		wordApp.Selection.Find.Forward = true;
 		wordApp.Selection.Find.MatchWholeWord = true;
@@ -237,9 +242,14 @@
 				strTemp = strTemp.Replace(((char)12).ToString(), "");//換頁
 				strTemp = strTemp.Trim();
 
-				if (strTemp.IndexOf("【檔案具結】") > -1 || strTemp == "【本申請書所檢送之PDF檔或影像檔與原本或正本相同】" || strTemp == "【本申請書所填寫之資料係為真實】") {
+				if (strTemp.IndexOf("【檔案具結】") > -1 || strTemp.IndexOf("【繳費資訊】") > -1 || strTemp == "【本申請書所檢送之PDF檔或影像檔與原本或正本相同】" || strTemp == "【本申請書所填寫之資料係為真實】") {
 					break;
-				} else if (strTemp.IndexOf("【其他】") > -1 || strTemp == "【文件描述】" || strTemp == "【附送書件】" || strTemp == "") {
+				} else if (strTemp.IndexOf("【其他】") > -1 
+                    || strTemp.IndexOf("【文件描述】") > -1 
+                    || strTemp == "【附送書件】" 
+                    || strTemp == ""
+                    || (strTemp.IndexOf("【基本資料表") > -1 && strTemp.IndexOf("未變更本案基本資料") > -1)
+                    ) {
 					continue;
 				} else {
 					strTemp = strTemp.Replace("【文件檔名】", "【其他】");

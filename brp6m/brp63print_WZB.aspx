@@ -6,10 +6,6 @@
 <%@ Import Namespace = "System.Collections.Generic"%>
 
 <script runat="server">
-	protected string in_scode = "";
-	protected string in_no = "";
-	protected string branch = "";
-
 	protected IPOReport ipoRpt = null;
 
 	private void Page_Load(System.Object sender, System.EventArgs e) {
@@ -18,14 +14,17 @@
 		Response.Expires = -1;
 		Response.Clear();
 
-		in_scode = (Request["in_scode"] ?? "").ToString();//n100
-		in_no = (Request["in_no"] ?? "").ToString();//20170103001
-		branch = (Request["branch"] ?? "").ToString();//N
+        string in_scode = (Request["in_scode"] ?? "").ToString();//n100
+        string in_no = (Request["in_no"] ?? "").ToString();//20170103001
+        string branch = (Request["branch"] ?? "").ToString();//N
 		string rectitle = (Request["receipt_title"] ?? "").ToString();//N
 		
 		try {
-			//電子收據第2階段上線後要廢除RectitleTitle參數
-			ipoRpt = new IPOReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch, rectitle);
+            ipoRpt = new IPOReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch, rectitle)
+            {
+                ReportCode = "WZB",
+            }.Init();
+
 			WordOut();
 		}
 		finally {
@@ -38,6 +37,8 @@
 		_tplFile.Add("apply", Server.MapPath("~/ReportTemplate/申請書/12申領專利證書及申請延緩公告申請書WZB.docx"));
 		_tplFile.Add("base", Server.MapPath("~/ReportTemplate/申請書/00基本資料表.docx"));
 		ipoRpt.CloneFromFile(_tplFile, true);
+
+		string docFileName = ipoRpt.Seq + "申領專利證書及申請延緩公告申請書.docx";
 		
 		DataTable dmp = ipoRpt.Dmp;
 		if (dmp.Rows.Count > 0) {
@@ -84,7 +85,7 @@
 			}
 		}
 
-		ipoRpt.Flush(Request["se_scode"] + "申領專利證書及申請延緩公告申請書.docx");
+		ipoRpt.Flush(docFileName);
 		ipoRpt.SetPrint();
 	}
 </script>

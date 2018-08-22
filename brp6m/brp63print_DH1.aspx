@@ -6,10 +6,6 @@
 <%@ Import Namespace = "System.Collections.Generic"%>
 
 <script runat="server">
-	protected string in_scode = "";
-	protected string in_no = "";
-	protected string branch = "";
-
 	protected IPOReport ipoRpt = null;
 
 	private void Page_Load(System.Object sender, System.EventArgs e) {
@@ -18,14 +14,16 @@
 		Response.Expires = -1;
 		Response.Clear();
 
-		in_scode = (Request["in_scode"] ?? "").ToString();//n100
-		in_no = (Request["in_no"] ?? "").ToString();//20170103001
-		branch = (Request["branch"] ?? "").ToString();//N
+        string in_scode = (Request["in_scode"] ?? "").ToString();//n100
+        string in_no = (Request["in_no"] ?? "").ToString();//20170103001
+        string branch = (Request["branch"] ?? "").ToString();//N
 		string rectitle = (Request["receipt_title"] ?? "").ToString();//N
 
 		try {
-			//電子收據第2階段上線後要廢除RectitleTitle參數
-			ipoRpt = new IPOReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch, rectitle);
+            ipoRpt = new IPOReport(Session["btbrtdb"].ToString(), in_scode, in_no, branch, rectitle)
+            {
+                ReportCode = "DH1",
+            }.Init();
 			WordOut();
 		}
 		finally {
@@ -50,6 +48,9 @@
 		_tplFile.Add("base", Server.MapPath("~/ReportTemplate/申請書/00基本資料表.docx"));
 		ipoRpt.CloneFromFile(_tplFile, true);
 
+		//string docFileName = string.Format("{0}-{1}_change_form.docx", Request["se_scode"], Request["wordname"]);
+		string docFileName = string.Format("{0}-{1}_change_form.docx", ipoRpt.Seq, Request["wordname"]);
+
 		DataTable dmp = ipoRpt.Dmp;
 		if (dmp.Rows.Count > 0) {
 			//標題區塊
@@ -62,7 +63,7 @@
 			}
 			//事務所或申請人案件編號
 			ipoRpt.ReplaceBookmark("seq", ipoRpt.Seq + "-" + dmp.Rows[0]["scode1"].ToString());
-			//中文名稱 / 英文名稱
+			//中文設計名稱 / 英文設計名稱
 			ipoRpt.ReplaceBookmark("cappl_name", dmp.Rows[0]["cappl_name"].ToString().ToXmlUnicode());
 			ipoRpt.ReplaceBookmark("eappl_name", dmp.Rows[0]["eappl_name"].ToString().ToXmlUnicode(true));
 			//申請人
@@ -118,25 +119,7 @@
 			}
 		}
 
-		if (Request["wordname"].ToString() == "DH3_2") {
-			ipoRpt.Flush(Request["se_scode"] + "-DH3_2_change_form.docx");//DH3_2設計專利改請衍生設計專利申請書(含圖說)
-		} else if (Request["wordname"].ToString() == "DH3_1") {
-			ipoRpt.Flush(Request["se_scode"] + "-DH3_1_change_form.docx");//DH3_1設計專利改請衍生設計專利申請書
-		} else if (Request["wordname"].ToString() == "DH1_6") {
-			ipoRpt.Flush(Request["se_scode"] + "-DH1_6_change_form.docx");//DH1_6聯合新式樣專利改請新式樣專利申請書(含圖說)
-		} else if (Request["wordname"].ToString() == "DH1_5") {
-			ipoRpt.Flush(Request["se_scode"] + "-DH1_5_change_form.docx");//DH1_5衍生設計專利改請設計專利申請書
-		} else if (Request["wordname"].ToString() == "DH1_4") {
-			ipoRpt.Flush(Request["se_scode"] + "-DH1_4_change_form.docx");//DH1_4新型專利改請設計專利申請書(含圖說)
-		} else if (Request["wordname"].ToString() == "DH1_3") {
-			ipoRpt.Flush(Request["se_scode"] + "-DH1_3_change_form.docx");//DH1_3新型專利改請設計專利申請書
-		} else if (Request["wordname"].ToString() == "DH1_2") {
-			ipoRpt.Flush(Request["se_scode"] + "-DH1_2_change_form.docx");//DH1_2發明專利改請設計專利申請書(含圖說)
-		} else if (Request["wordname"].ToString() == "DH1_1") {
-			ipoRpt.Flush(Request["se_scode"] + "-DH1_1_change_form.docx");//DH1_1發明專利改請設計專利申請書
-		} else {
-			ipoRpt.Flush(Request["se_scode"] + "-DH1_patent_form.docx");
-		}
+		ipoRpt.Flush(docFileName);
 		ipoRpt.SetPrint();
 	}
 </script>
